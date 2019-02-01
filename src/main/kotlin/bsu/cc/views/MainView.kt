@@ -57,8 +57,7 @@ class MainView : View("Conflict Checker") {
         }
         bottom {
             hbox {
-                addClass(Styles.footer)
-                label("File Name").addClass(Styles.footer)
+                label("File Name")
                 fileNameField = textfield()
             }
         }
