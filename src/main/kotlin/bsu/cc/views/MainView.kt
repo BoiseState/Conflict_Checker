@@ -6,14 +6,38 @@ import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
 import tornadofx.*
 
-class MainView : View("Hello TornadoFX") {
+class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
 
     override val root = borderpane {
         addClass(Styles.welcomeScreen)
         top {
-            stackpane {
-                label(title).addClass(Styles.heading)
+            borderpane {
+                top {
+                    menubar {
+                        menu("File") {
+                            item("Export", "Shortcut+E").action {
+                                println("Exporting! (TO BE IMPLEMENTED)")
+                            }
+                        }
+                        menu("Edit") {
+                            item("Copy", "Shortcut+C").action {
+                                println("Copying!")
+                            }
+                            item("Paste", "Shortcut+V").action {
+                                println("Pasting!")
+                            }
+                        }
+                        menu("View") {
+                            item("Theme").action {
+                                println("Theme needs to be implemented")
+                            }
+                        }
+                    }
+                }
+                bottom {
+                    label(title).addClass(Styles.heading)
+                }
             }
         }
         center {
@@ -33,7 +57,8 @@ class MainView : View("Hello TornadoFX") {
         }
         bottom {
             hbox {
-                label("File Name")
+                addClass(Styles.footer)
+                label("File Name").addClass(Styles.footer)
                 fileNameField = textfield()
             }
         }
