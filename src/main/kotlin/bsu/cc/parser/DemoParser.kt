@@ -9,17 +9,17 @@ import java.io.FileInputStream
 class DemoParser {
     companion object {
         fun demoParse(fileName: String) {
-            val dClasses = XlsxParser.fileToDataClasses(fileName, ::demoDataClassProducer)
-//            val row = XlsxParser.fileToRows(fileName).asSequence().toList()[1]
-//            val dClass: DemoDataClass = XlsxParser.rowToDataClass(row, ::demoDataClassProducer)
+            val dClasses = XlsxParser.fileToDataClasses(
+                    fileName,
+                    ::demoDataClassProducer,
+                    setOf(0) //Ignores the header row 
+            )
             dClasses.forEach { dClass ->
                 println(dClass.field1)
                 println(dClass.field2)
                 println(dClass.field3)
             }
         }
-
-
 
         fun demoDataClassProducer(rowMap: Map<Int, Cell>): DemoDataClass {
             return DemoDataClass(

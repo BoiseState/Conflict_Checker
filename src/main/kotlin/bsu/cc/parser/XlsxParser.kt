@@ -1,6 +1,5 @@
 package bsu.cc.parser
 
-import bsu.cc.data_classes.DemoDataClass
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Row
@@ -14,9 +13,12 @@ class XlsxParser {
     companion object {
         fun <T> fileToDataClasses(
                 fileName: String,
-                dataProducer: (rowMap: Map<Int, Cell>) -> T
+                dataProducer: (rowMap: Map<Int, Cell>) -> T,
+                excludedRowIndices: Set<Int>? = null
         ): Sequence<T> {
-            return fileToRows(fileName).asSequence().map { row ->
+            return fileToRows(fileName).asSequence().withIndex().filter { (index, _) ->
+                excludedRowIndices == null || !excludedRowIndices.contains(index)
+            }.map { (_, row) ->
                 rowToDataClass(row, dataProducer)
             }
         }
