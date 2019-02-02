@@ -9,10 +9,10 @@ import java.io.FileInputStream
 class DemoParser {
     companion object {
         fun demoParse(fileName: String) {
-            val dClasses = XlsxParser.fileToDataClasses(
-                    fileName,
-                    ::demoDataClassProducer,
-                    setOf(0) //Ignores the header row 
+            val dClasses = fileToDataClasses(
+                    fileName = fileName,
+                    dataProducer = ::demoDataClassProducer,
+                    excludedRowIndices =  setOf(0) //Ignores the header row
             )
             dClasses.forEach { dClass ->
                 println(dClass.field1)
@@ -23,9 +23,9 @@ class DemoParser {
 
         fun demoDataClassProducer(rowMap: Map<Int, Cell>): DemoDataClass {
             return DemoDataClass(
-                    field1 = XlsxParser.getFromCellOrThrow(rowMap[0]),
-                    field2 = XlsxParser.getFromCellOrThrow(rowMap[1]),
-                    field3 = XlsxParser.getFromCellOrThrow(rowMap[2])
+                    field1 = getFromCellOrThrow(rowMap[0]),
+                    field2 = getFromCellOrThrow(rowMap[1]),
+                    field3 = getFromCellOrThrow(rowMap[2])
             )
         }
     }
