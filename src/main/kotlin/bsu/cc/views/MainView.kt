@@ -4,6 +4,7 @@ import bsu.cc.Styles
 import bsu.cc.parser.ParserDemo
 import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
+import javafx.scene.control.SelectionMode
 import tornadofx.*
 
 class MainView : View("Conflict Checker") {
@@ -43,20 +44,26 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
-                button("Click me") {
-                    setOnAction {
-                        alert(INFORMATION, "Well done!", "You clicked me!")
-                    }
-                }
-                button("Print Test") {
-                    setOnAction{
-                        ParserDemo.demoParse(fileNameField.text)
-                    }
+//                button("Click me") {
+//                    setOnAction {
+//                        alert(INFORMATION, "Well done!", "You clicked me!")
+//                    }
+//                }
+//                button("Print Test") {
+//                    setOnAction{
+//                        ParserDemo.demoParse(fileNameField.text)
+//                    }
+//                }
+                val greekLetters = listOf("Alpha","Beta",
+                        "Gamma","Delta","Epsilon").observable()
+                listview(greekLetters) {
+                    selectionModel.selectionMode = SelectionMode.SINGLE
                 }
             }
         }
         bottom {
             hbox {
+                addClass(Styles.footer)
                 label("File Name")
                 fileNameField = textfield()
             }

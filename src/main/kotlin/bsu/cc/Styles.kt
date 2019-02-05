@@ -5,6 +5,7 @@ import javafx.scene.paint.CycleMethod
 import javafx.scene.paint.LinearGradient
 import javafx.scene.paint.Stop
 import javafx.scene.text.FontWeight
+import javafx.scene.text.TextAlignment
 import tornadofx.*
 
 class Styles : Stylesheet() {
@@ -17,11 +18,11 @@ class Styles : Stylesheet() {
 
     init {
         welcomeScreen {
-            backgroundColor += LinearGradient(0.0, 0.0, 0.0, 1.0, true, CycleMethod.NO_CYCLE, Stop(0.0, c("#028aff")), Stop(1.0, c("#003780")))
+            backgroundColor += LinearGradient(0.0, 0.0, 0.0, 1.0, true, CycleMethod.NO_CYCLE, Stop(0.0, c("#ddddde")), Stop(1.0, c("#eeeeee")))
             heading {
                 padding = box(10.px)
                 fontSize = 3.em
-                textFill = Color.WHITE
+                textFill = Color.BLACK
                 fontWeight = FontWeight.BOLD
             }
             content {
@@ -32,7 +33,7 @@ class Styles : Stylesheet() {
             }
             footer {
                 label {
-                    textFill = Color.WHITE
+                    textFill = Color.BLACK
                     padding = box(5.px,10.px)
                 }
             }
