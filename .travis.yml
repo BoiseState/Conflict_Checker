@@ -1,0 +1,7 @@
+language: java
+cache:
+  directories:
+    - "$HOME/.m2/repository"
+    - "src/main/resources"
+before_cache:
+  - rm -rf $HOME/.m2/repository/bsu-senior-design/Conflict_Checker
