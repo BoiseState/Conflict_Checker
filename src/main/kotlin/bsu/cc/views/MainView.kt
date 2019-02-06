@@ -2,7 +2,6 @@ package bsu.cc.views
 
 import bsu.cc.Styles
 import bsu.cc.parser.DemoParser
-import bsu.cc.parser.XlsxParser
 import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
 import tornadofx.*

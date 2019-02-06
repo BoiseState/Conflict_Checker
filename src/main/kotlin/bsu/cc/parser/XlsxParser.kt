@@ -3,29 +3,76 @@ package bsu.cc.parser
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.lang.reflect.Type
 
 
-fun <T> fileToDataClasses(
-        fileName: String,
-        dataProducer: (rowMap: Map<Int, Cell>) -> T,
-        excludedRowIndices: Set<Int>? = null
+fun readWorkbook(fileName: String): XSSFWorkbook {
+    val file = FileInputStream(File(fileName))
+    return XSSFWorkbook(file)
+}
+
+fun <T> sheetToDataClasses(
+        sheet: Sheet,
+        dataProducer: (namedRowMap: Map<String, Cell>) -> T
 ): Sequence<T> {
-    return fileToRows(fileName).asSequence().withIndex().filter { (index, _) ->
-        excludedRowIndices == null || !excludedRowIndices.contains(index)
+    val headerMap = sheetHeaderMap(sheet)
+    fun convertedProducer(indexedRowMap: Map<Int, Cell>): T {
+        return dataProducer(indexedToNamedRowMap(indexedRowMap, headerMap))
+    }
+    return sheetToDataClasses(sheet, ::convertedProducer, true)
+}
+
+fun <T> sheetToDataClasses(
+        sheet: Sheet,
+        dataProducer: (indexedRowMap: Map<Int, Cell>) -> T,
+        excludeHeader: Boolean? = null
+): Sequence<T> {
+    return sheet.iterator().asSequence().withIndex().filter { (index, _) ->
+        excludeHeader == null || !(excludeHeader && index == 0)
     }.map { (_, row) ->
         rowToDataClass(row, dataProducer)
     }
 }
 
-fun fileToRows(fileName: String): MutableIterator<Row> {
-    val file = FileInputStream(File(fileName))
-    val sheet = XSSFWorkbook(file).getSheetAt(0)
-    return sheet.iterator()
+private fun indexedToNamedRowMap(
+        indexedRowMap: Map<Int, Cell>,
+        colNameMap: Map<Int, String>
+): Map<String, Cell> {
+    val output = HashMap<String, Cell>()
+    indexedRowMap.keys.forEach { index ->
+        val colName = colNameMap[index]
+        val rowCell = indexedRowMap[index]
+        if(colName == null) {
+            throw IllegalArgumentException("Accessing column index out of bounds of headers")
+        }
+        if(rowCell == null) {
+            throw IllegalStateException("Key not in map") //This should never happen, but needed for smartcast
+        }
+        output[colName] = rowCell
+    }
+    return output
+}
+
+
+fun sheetHeaderMap(sheet: Sheet): Map<Int, String> {
+    val output = HashMap<Int, String>()
+    sheet.first().cellIterator().withIndex().forEachRemaining { (index, cell) ->
+        if(cell.cellType != CellType.STRING) {
+            throw IllegalArgumentException("Sheet header has non-string in header")
+        }
+        val cellString = cell.stringCellValue
+        if(output.containsValue(cellString)) { //Guarantees a bi-map
+            throw IllegalArgumentException("Sheet contains duplicate headers")
+        }
+        output[index] = cellString
+    }
+    return output
 }
 
 fun <T> rowToDataClass(
@@ -52,6 +99,23 @@ inline fun <reified T : Any> getFromCellOrThrow(cell: Cell?): T {
     }
 }
 
+inline fun <reified T : Any> getFromCellOrDefault(cell: Cell?, default: T): T {
+    if(cell == null) {
+        return default
+    }
+
+    val expectedCellType = typeToCellType(T::class.java)
+    if(expectedCellType != cell.cellType) {
+        return default
+    }
+
+    return when(cell.cellType) {
+        CellType.STRING -> cell.stringCellValue as T
+        CellType.NUMERIC -> cell.numericCellValue as T
+        else -> default
+    }
+}
+
 fun typeToCellType(kotlinType: Type): CellType {
     return when(kotlinType) {
         Int::class.java -> CellType.NUMERIC
@@ -59,17 +123,6 @@ fun typeToCellType(kotlinType: Type): CellType {
         Number::class.java -> CellType.NUMERIC
         String::class.java -> CellType.STRING
         else -> CellType._NONE
-    }
-}
-
-fun printRowCells(row: Row) {
-    row.iterator().forEachRemaining { cell ->
-        val printVal = when(cell.cellType) {
-            CellType.STRING -> cell.stringCellValue
-            CellType.NUMERIC -> cell.numericCellValue.toString()
-            else -> "UNPARSABLE CELL"
-        }
-        print("$printVal, ")
     }
 }
 

@@ -9,10 +9,16 @@ import java.io.FileInputStream
 class DemoParser {
     companion object {
         fun demoParse(fileName: String) {
-            val dClasses = fileToDataClasses(
-                    fileName = fileName,
-                    dataProducer = ::demoDataClassProducer,
-                    excludedRowIndices =  setOf(0) //Ignores the header row
+            val sheet = readWorkbook(fileName).first()
+//            val dClasses = sheetToDataClasses(
+//                    sheet = sheet,
+//                    dataProducer = ::demoDataClassIndexedProducer,
+//                    excludeHeader = true //Ignores the header row
+//            )
+
+            val dClasses = sheetToDataClasses(
+                    sheet = sheet,
+                    dataProducer = ::demoDataClassNamedProducer
             )
             dClasses.forEach { dClass ->
                 println(dClass.field1)
@@ -21,11 +27,19 @@ class DemoParser {
             }
         }
 
-        fun demoDataClassProducer(rowMap: Map<Int, Cell>): DemoDataClass {
+        private fun demoDataClassIndexedProducer(rowMap: Map<Int, Cell>): DemoDataClass {
             return DemoDataClass(
                     field1 = getFromCellOrThrow(rowMap[0]),
                     field2 = getFromCellOrThrow(rowMap[1]),
                     field3 = getFromCellOrThrow(rowMap[2])
+            )
+        }
+
+        private fun demoDataClassNamedProducer(rowMap: Map<String, Cell>): DemoDataClass {
+            return DemoDataClass(
+                    field1 = getFromCellOrThrow(rowMap["Subject"]),
+                    field2 = getFromCellOrThrow(rowMap["Catalog Nbr"]),
+                    field3 = getFromCellOrThrow(rowMap["Descr"])
             )
         }
     }
