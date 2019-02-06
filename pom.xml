@@ -48,9 +48,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.siegmar</groupId>
-            <artifactId>fastcsv</artifactId>
-            <version>1.0.3 </version>
+            <groupId>com.breinify</groupId>
+            <artifactId>brein-time-utilities</artifactId>
+            <version>1.7.0</version>
         </dependency>
     </dependencies>
 
