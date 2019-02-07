@@ -1,4 +1,6 @@
 # Conflict_Checker
+[![Build Status](https://travis-ci.com/JordanPaoletti/Conflict_Checker.svg?branch=master)](https://travis-ci.com/JordanPaoletti/Conflict_Checker)
+
 JVM application that checks for conflicts in class schedules
 
 # Authors 
