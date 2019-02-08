@@ -18,7 +18,8 @@ class DemoParser {
 
             val dClasses = sheetToDataClasses(
                     sheet = sheet,
-                    dataProducer = ::demoDataClassNamedProducer
+                    dataProducer = ::demoDataClassNamedProducer,
+                    ignoreDuplicateHeaders = true
             )
             dClasses.forEach { dClass ->
                 println(dClass.field1)

@@ -19,13 +19,14 @@ fun readWorkbook(fileName: String): XSSFWorkbook {
 
 fun <T> sheetToDataClasses(
         sheet: Sheet,
-        dataProducer: (namedRowMap: Map<String, Cell>) -> T
+        dataProducer: (namedRowMap: Map<String, Cell>) -> T,
+        ignoreDuplicateHeaders: Boolean = false
 ): Sequence<T> {
     val headerMap = sheetHeaderMap(sheet)
-    fun convertedProducer(indexedRowMap: Map<Int, Cell>): T {
-        return dataProducer(indexedToNamedRowMap(indexedRowMap, headerMap))
+    fun translatedProducer(indexedRowMap: Map<Int, Cell>): T {
+        return dataProducer(indexedToNamedRowMap(indexedRowMap, headerMap, ignoreDuplicateHeaders))
     }
-    return sheetToDataClasses(sheet, ::convertedProducer, true)
+    return sheetToDataClasses(sheet, ::translatedProducer, true)
 }
 
 fun <T> sheetToDataClasses(
@@ -42,7 +43,8 @@ fun <T> sheetToDataClasses(
 
 private fun indexedToNamedRowMap(
         indexedRowMap: Map<Int, Cell>,
-        colNameMap: Map<Int, String>
+        colNameMap: Map<Int, String>,
+        ignoreDuplicateColumns: Boolean = false
 ): Map<String, Cell> {
     val output = HashMap<String, Cell>()
     indexedRowMap.keys.forEach { index ->
@@ -54,7 +56,9 @@ private fun indexedToNamedRowMap(
         if(rowCell == null) {
             throw IllegalStateException("Key not in map") //This should never happen, but needed for smartcast
         }
-        output[colName] = rowCell
+        if(!output.containsKey(colName) || !ignoreDuplicateColumns) {
+            output[colName] = rowCell
+        }
     }
     return output
 }
@@ -66,11 +70,7 @@ fun sheetHeaderMap(sheet: Sheet): Map<Int, String> {
         if(cell.cellType != CellType.STRING) {
             throw IllegalArgumentException("Sheet header has non-string in header")
         }
-        val cellString = cell.stringCellValue
-        if(output.containsValue(cellString)) { //Guarantees a bi-map
-            throw IllegalArgumentException("Sheet contains duplicate headers")
-        }
-        output[index] = cellString
+        output[index] = cell.stringCellValue
     }
     return output
 }
