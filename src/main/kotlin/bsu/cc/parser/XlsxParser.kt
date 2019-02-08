@@ -1,10 +1,5 @@
 package bsu.cc.parser
 
-<<<<<<< HEAD
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
@@ -12,6 +7,11 @@ import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.lang.reflect.Type
 import java.util.*
+import org.apache.poi.ss.usermodel.*
+import java.awt.Font
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import javax.swing.text.StyleConstants.setItalic
 
 
 
@@ -150,8 +150,28 @@ private fun rowToCellMap(row: Row): Map<Int, Cell> {
 
     return output
 }
-=======
-fun readWorksheet(fileName: String) {
-    
+
+//fun highlightCells(
+//        sheet: Sheet,
+//        rowHighlighter: (row: Row) -> )
+
+fun highlightTest(workbook: Workbook, sheetIndex: Int = 0) {
+    val demoStyle = workbook.createCellStyle()
+    val sheet = workbook.getSheetAt(sheetIndex)
+    val font = workbook.createFont()
+    font.fontHeightInPoints = 24.toShort()
+    font.fontName = "Courier New"
+    font.italic = true
+    font.strikeout = true
+
+    demoStyle.fillBackgroundColor = IndexedColors.GREEN.index
+    demoStyle.fillForegroundColor = IndexedColors.BLUE.index
+    demoStyle.fillPattern = FillPatternType.BIG_SPOTS
+    demoStyle.setFont(font)
+    val cell = sheet.first().first()
+    cell.cellStyle = demoStyle
+    cell.setCellValue("CHANGED")
+    FileOutputStream("demo_out.xlsx").use {
+        workbook.write(it)
+    }
 }
->>>>>>> Adding XlsxParser file
