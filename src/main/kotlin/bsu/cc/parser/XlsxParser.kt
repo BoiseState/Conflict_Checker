@@ -10,6 +10,8 @@ import java.io.FileInputStream
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.lang.reflect.Type
+import java.util.*
+
 
 
 fun readWorkbook(fileName: String): XSSFWorkbook {
@@ -34,7 +36,9 @@ fun <T> sheetToDataClasses(
         dataProducer: (indexedRowMap: Map<Int, Cell>) -> T,
         excludeHeader: Boolean? = null
 ): Sequence<T> {
-    return sheet.iterator().asSequence().withIndex().filter { (index, _) ->
+    return sheet.iterator().asSequence().withIndex().filter { (_, row) ->
+        row.cellIterator().asSequence().filter{cell -> cell.cellType != CellType.BLANK}.toList().isNotEmpty() //Ignore blank rows
+    }.filter { (index, _) ->
         excludeHeader == null || !(excludeHeader && index == 0)
     }.map { (_, row) ->
         rowToDataClass(row, dataProducer)
@@ -56,21 +60,29 @@ private fun indexedToNamedRowMap(
         if(rowCell == null) {
             throw IllegalStateException("Key not in map") //This should never happen, but needed for smartcast
         }
-        if(!output.containsKey(colName) || !ignoreDuplicateColumns) {
+        if(!output.containsKey(colName)) {
             output[colName] = rowCell
+        } else if(!ignoreDuplicateColumns) {
+            throw IllegalArgumentException("Column map contains duplicate column names")
         }
     }
     return output
 }
 
-
 fun sheetHeaderMap(sheet: Sheet): Map<Int, String> {
     val output = HashMap<Int, String>()
-    sheet.first().cellIterator().withIndex().forEachRemaining { (index, cell) ->
-        if(cell.cellType != CellType.STRING) {
-            throw IllegalArgumentException("Sheet header has non-string in header")
+    val headerRow = sheet.first()
+    //Can't use foreach iterator because it skips empty columns, which causes column indices to be wrong
+    (0 until headerRow.lastCellNum).forEach{index ->
+        if(headerRow.getCell(index) != null) {
+            val cell = headerRow.getCell(index)
+            if(cell != null) {
+                if(cell.cellType != CellType.STRING) {
+                    throw IllegalArgumentException("Sheet header has non-string in header")
+                }
+                output[index] = cell.stringCellValue
+            }
         }
-        output[index] = cell.stringCellValue
     }
     return output
 }
@@ -94,7 +106,7 @@ inline fun <reified T : Any> getFromCellOrThrow(cell: Cell?): T {
 
     return when(cell.cellType) {
         CellType.STRING -> cell.stringCellValue as T
-        CellType.NUMERIC -> cell.numericCellValue as T
+        CellType.NUMERIC -> if(T::class.java == Date::class.java) cell.dateCellValue as T else cell.numericCellValue as T
         else -> throw IllegalArgumentException("Attempting to get cell value for not string/numeric")
     }
 }
@@ -111,16 +123,17 @@ inline fun <reified T : Any> getFromCellOrDefault(cell: Cell?, default: T): T {
 
     return when(cell.cellType) {
         CellType.STRING -> cell.stringCellValue as T
-        CellType.NUMERIC -> cell.numericCellValue as T
+        CellType.NUMERIC -> if(T::class.java == Date::class.java) cell.dateCellValue as T else cell.numericCellValue as T
         else -> default
     }
 }
 
-fun typeToCellType(kotlinType: Type): CellType {
-    return when(kotlinType) {
-        Int::class.java -> CellType.NUMERIC
-        Double::class.java -> CellType.NUMERIC
+fun typeToCellType(javaType: Type): CellType {
+    return when(javaType) {
+        Int::class.java, Integer::class.java  -> throw IllegalArgumentException("Numeric values in Apache POI are treated as doubles, Ints are not supported")
+        java.lang.Double::class.java -> CellType.NUMERIC
         Number::class.java -> CellType.NUMERIC
+        Date::class.java -> CellType.NUMERIC //Dates are stored as numbers
         String::class.java -> CellType.STRING
         else -> CellType._NONE
     }
@@ -128,8 +141,12 @@ fun typeToCellType(kotlinType: Type): CellType {
 
 private fun rowToCellMap(row: Row): Map<Int, Cell> {
     val output = HashMap<Int, Cell>()
-    row.iterator().withIndex().forEachRemaining { indexedVal ->
-        output[indexedVal.index] = indexedVal.value
+    //Can't use foreach iterator because it skips empty columns, which causes column indices to be wrong
+    (0 until row.lastCellNum).forEach{index ->
+        if(row.getCell(index) != null) {
+            output[index] = row.getCell(index)
+        }
     }
+
     return output
 }
