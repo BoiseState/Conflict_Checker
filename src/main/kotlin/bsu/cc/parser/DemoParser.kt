@@ -10,18 +10,18 @@ class DemoParser {
     companion object {
         fun demoParse(fileName: String) {
             val sheet = readWorkbook(fileName).first()
-//            val dClasses = sheetToDataClasses(
-//                    sheet = sheet,
-//                    dataProducer = ::demoDataClassIndexedProducer,
-//                    excludeHeader = true //Ignores the header row
-//            )
+            val dClassesFromIndex = sheetToDataClasses(
+                    sheet = sheet,
+                    dataProducer = ::demoDataClassIndexedProducer,
+                    excludeHeader = true //Ignores the header row
+            )
 
-            val dClasses = sheetToDataClasses(
+            val dClassesFromNamed = sheetToDataClasses(
                     sheet = sheet,
                     dataProducer = ::demoDataClassNamedProducer,
                     ignoreDuplicateHeaders = true
             )
-            dClasses.forEach { dClass ->
+            dClassesFromNamed.forEach { dClass ->
                 println(dClass.field1)
                 println(dClass.field2)
                 println(dClass.field3)

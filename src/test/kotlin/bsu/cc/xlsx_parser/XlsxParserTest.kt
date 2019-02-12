@@ -159,7 +159,6 @@ class XlsxParserTest : WordSpec() {
 
                 expectedResults shouldBe parseResults.toList()
             }
-
         }
     }
 }

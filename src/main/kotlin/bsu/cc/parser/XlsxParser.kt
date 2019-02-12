@@ -78,7 +78,7 @@ fun sheetHeaderMap(sheet: Sheet): Map<Int, String> {
             val cell = headerRow.getCell(index)
             if(cell != null) {
                 if(cell.cellType != CellType.STRING) {
-                    throw IllegalArgumentException("Sheet header has non-string in header")
+                    throw IllegalArgumentException("Sheet has non-string in header")
                 }
                 output[index] = cell.stringCellValue
             }
