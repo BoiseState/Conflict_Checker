@@ -1,8 +1,6 @@
 package bsu.cc.schedule
 
 import com.brein.time.timeintervals.intervals.IInterval
-import com.brein.time.timeintervals.intervals.NumberInterval
-import java.io.Serializable
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -22,32 +20,21 @@ class ClassSchedule(val startTime: LocalTime,
                     val room: String,
                     val instructors: Set<Instructor>,
                     val description: String
-                    ) : IInterval<Long> {
-
+                    ) : IInterval<Int> {
 
     override fun compareTo(other: IInterval<*>?): Int {
-        val cmpStart = startTime.toNanoOfDay() - other?.getNormStart() as Long
-        if (cmpStart == 0L) {
-            val cmpEnd = endTime.toNanoOfDay() - other.getNormEnd() as Long
-            return when {
-                cmpEnd > 0 -> 1
-                cmpEnd < 0 -> -1
-                else -> 0
-            }
+        val cmpStart = startTime.toSecondOfDay() - other?.getNormStart() as Int
+        if (cmpStart == 0) {
+            return endTime.toSecondOfDay() - other.getNormEnd() as Int
         }
-        return when {
-            cmpStart > 0 -> 1
-            cmpStart < 0 -> -1
-            else -> 0
-        }
+        return cmpStart
     }
 
     override fun getUniqueIdentifier(): String = "[$startTime, $endTime]"
 
+    override fun getNormStart(): Int = startTime.toSecondOfDay()
 
-    override fun getNormStart(): Long = startTime.toNanoOfDay()
-
-    override fun getNormEnd(): Long = endTime.toNanoOfDay()
+    override fun getNormEnd(): Int = endTime.toSecondOfDay()
 
 }
 
