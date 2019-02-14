@@ -44,16 +44,16 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
-//                button("Click me") {
-//                    setOnAction {
-//                        alert(INFORMATION, "Well done!", "You clicked me!")
-//                    }
-//                }
-//                button("Print Test") {
-//                    setOnAction{
-//                        ParserDemo.demoParse(fileNameField.text)
-//                    }
-//                }
+                button("Click me") {
+                    setOnAction {
+                        alert(INFORMATION, "Well done!", "You clicked me!")
+                    }
+                }
+                button("Print Test") {
+                    setOnAction{
+                        ParserDemo.demoParse(fileNameField.text)
+                    }
+                }
                 val greekLetters = listOf("Alpha","Beta",
                         "Gamma","Delta","Epsilon").observable()
                 listview(greekLetters) {
