@@ -59,6 +59,11 @@ class MainView : View("Conflict Checker") {
                 listview(greekLetters) {
                     selectionModel.selectionMode = SelectionMode.SINGLE
                 }
+                button("Highlight Test") {
+                    setOnAction{
+                        DemoParser.highlightTest(fileNameField.text)
+                    }
+                }
             }
         }
         bottom {

@@ -151,27 +151,17 @@ private fun rowToCellMap(row: Row): Map<Int, Cell> {
     return output
 }
 
-//fun highlightCells(
-//        sheet: Sheet,
-//        rowHighlighter: (row: Row) -> )
-
-fun highlightTest(workbook: Workbook, sheetIndex: Int = 0) {
-    val demoStyle = workbook.createCellStyle()
-    val sheet = workbook.getSheetAt(sheetIndex)
-    val font = workbook.createFont()
-    font.fontHeightInPoints = 24.toShort()
-    font.fontName = "Courier New"
-    font.italic = true
-    font.strikeout = true
-
-    demoStyle.fillBackgroundColor = IndexedColors.GREEN.index
-    demoStyle.fillForegroundColor = IndexedColors.BLUE.index
-    demoStyle.fillPattern = FillPatternType.BIG_SPOTS
-    demoStyle.setFont(font)
-    val cell = sheet.first().first()
-    cell.cellStyle = demoStyle
-    cell.setCellValue("CHANGED")
-    FileOutputStream("demo_out.xlsx").use {
-        workbook.write(it)
+fun applyStyleToRow(
+        sheet: Sheet,
+        rowIndex: Int,
+        cellStyle: CellStyle) {
+    val row = sheet.getRow(rowIndex)?: throw IllegalArgumentException("Sheet has no row at given index")
+    //Can't use iterator because it skips empty cells
+    (0 until row.lastCellNum).forEach{ index ->
+        val cell = row.getCell(index)?: row.createCell(index)
+        cell.cellStyle = cellStyle
+        //A new comment
     }
 }
+
+

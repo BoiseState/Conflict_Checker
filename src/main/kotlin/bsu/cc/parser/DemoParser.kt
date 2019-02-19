@@ -2,9 +2,13 @@ package bsu.cc.parser
 
 import bsu.cc.data_classes.DemoDataClass
 import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class DemoParser {
     companion object {
@@ -25,6 +29,26 @@ class DemoParser {
                 println(dClass.field1)
                 println(dClass.field2)
                 println(dClass.field3)
+            }
+        }
+
+        fun highlightTest(fileName: String, sheetIndex: Int = 0) {
+            val workbook = readWorkbook(fileName)
+            val demoStyle = workbook.createCellStyle()
+            val sheet = workbook.getSheetAt(sheetIndex)
+            val font = workbook.createFont()
+            font.fontHeightInPoints = 24.toShort()
+            font.fontName = "Courier New"
+            font.italic = true
+            font.strikeout = true
+
+            demoStyle.fillBackgroundColor = IndexedColors.GREEN.index
+            demoStyle.fillForegroundColor = IndexedColors.BLUE.index
+            demoStyle.fillPattern = FillPatternType.BIG_SPOTS
+            demoStyle.setFont(font)
+            applyStyleToRow(sheet, 3, demoStyle)
+            FileOutputStream("demo_out.xlsx").use {
+                workbook.write(it)
             }
         }
 
