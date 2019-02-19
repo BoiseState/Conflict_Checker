@@ -15,8 +15,7 @@ import java.util.*
 
 
 fun readWorkbook(fileName: String): XSSFWorkbook {
-    val file = FileInputStream(File(fileName))
-    return XSSFWorkbook(file)
+    return XSSFWorkbook(FileInputStream(File(fileName)))
 }
 
 fun <T> sheetToDataClasses(

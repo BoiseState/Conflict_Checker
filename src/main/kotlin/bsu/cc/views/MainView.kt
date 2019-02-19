@@ -58,7 +58,7 @@ class MainView : View("Conflict Checker") {
         bottom {
             hbox {
                 label("File Name")
-                fileNameField = textfield("src\\main\\resources\\Spring 2019 Validation Report Example.xlsx")
+                fileNameField = textfield(""""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
             }
         }
     }
