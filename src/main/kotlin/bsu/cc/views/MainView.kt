@@ -1,7 +1,7 @@
 package bsu.cc.views
 
 import bsu.cc.Styles
-import bsu.cc.parser.ParserDemo
+import bsu.cc.parser.DemoParser
 import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
 import javafx.scene.control.SelectionMode
@@ -51,7 +51,7 @@ class MainView : View("Conflict Checker") {
                 }
                 button("Print Test") {
                     setOnAction{
-                        ParserDemo.demoParse(fileNameField.text)
+                        DemoParser.demoParse(fileNameField.text)
                     }
                 }
                 val greekLetters = listOf("Alpha","Beta",
@@ -65,7 +65,7 @@ class MainView : View("Conflict Checker") {
             hbox {
                 addClass(Styles.footer)
                 label("File Name")
-                fileNameField = textfield()
+                fileNameField = textfield(""""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
             }
         }
     }
