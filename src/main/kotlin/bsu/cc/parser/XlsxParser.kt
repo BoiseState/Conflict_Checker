@@ -8,10 +8,6 @@ import java.lang.IllegalStateException
 import java.lang.reflect.Type
 import java.util.*
 import org.apache.poi.ss.usermodel.*
-import java.awt.Font
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
-import javax.swing.text.StyleConstants.setItalic
 
 
 
@@ -151,16 +147,29 @@ private fun rowToCellMap(row: Row): Map<Int, Cell> {
     return output
 }
 
-fun applyStyleToRow(
-        sheet: Sheet,
+fun highlightRow(
+        workbook: Workbook,
+        sheetIndex: Int,
         rowIndex: Int,
-        cellStyle: CellStyle) {
+        color: IndexedColors,
+        extendToMatchHeader: Boolean = false
+) {
+    val sheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("Sheet does not exist at given index")
+    val highlightStyle = workbook.createCellStyle()
+    highlightStyle.fillForegroundColor = color.index
+    highlightStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
+    val highlightToCol = if(extendToMatchHeader) sheet.getRow(0).lastCellNum else sheet.getRow(rowIndex).lastCellNum
+    applyStyleToRow(sheet, rowIndex, highlightStyle, highlightToCol)
+}
+
+fun applyStyleToRow(sheet: Sheet, rowIndex: Int, cellStyle: CellStyle, highlightToCol: Short? = null) {
     val row = sheet.getRow(rowIndex)?: throw IllegalArgumentException("Sheet has no row at given index")
+    val boundIndex = highlightToCol ?: row.lastCellNum
+
     //Can't use iterator because it skips empty cells
-    (0 until row.lastCellNum).forEach{ index ->
+    (0 until boundIndex).forEach{ index ->
         val cell = row.getCell(index)?: row.createCell(index)
         cell.cellStyle = cellStyle
-        //A new comment
     }
 }
 
