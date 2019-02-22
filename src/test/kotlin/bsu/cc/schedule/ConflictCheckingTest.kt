@@ -1,10 +1,6 @@
 package bsu.cc.schedule
-import bsu.cc.constraints.checkOverlapsAreEqual
-import bsu.cc.schedule.*
-import io.kotlintest.fail
 import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.WordSpec
 import java.time.DayOfWeek
 import java.time.LocalDate

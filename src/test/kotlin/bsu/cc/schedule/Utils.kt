@@ -1,6 +1,4 @@
-package bsu.cc.constraints
-
-import bsu.cc.schedule.ClassSchedule
+package bsu.cc.schedule
 
 /**
  * list equality depends on position, so sort sub-lists first
