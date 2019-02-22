@@ -1,10 +1,6 @@
 package bsu.cc.example
 
 import bsu.cc.schedule.*
-import com.brein.time.timeintervals.collections.ListIntervalCollection
-import com.brein.time.timeintervals.filters.IntervalFilter
-import com.brein.time.timeintervals.indexes.IntervalTreeBuilder
-import com.brein.time.timeintervals.indexes.IntervalValueComparator
 import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.WordSpec
