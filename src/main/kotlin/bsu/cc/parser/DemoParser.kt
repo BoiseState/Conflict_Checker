@@ -31,7 +31,7 @@ class DemoParser {
 
         fun highlightTest(fileName: String, sheetIndex: Int = 0) {
             val workbook = readWorkbook(fileName)
-            highlightRow(workbook, sheetIndex, 1, IndexedColors.RED, true)
+            highlightRow(workbook.getSheetAt(sheetIndex), 1, IndexedColors.RED, true)
             FileOutputStream("demo_out.xlsx").use {
                 workbook.write(it)
             }
