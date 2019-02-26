@@ -148,13 +148,12 @@ private fun rowToCellMap(row: Row): Map<Int, Cell> {
 }
 
 fun highlightRow(
-        workbook: Workbook,
-        sheetIndex: Int,
+        sheet: Sheet,
         rowIndex: Int,
         color: IndexedColors,
         extendToMatchHeader: Boolean = false
 ) {
-    val sheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("Sheet does not exist at given index")
+    val workbook = sheet.workbook
     val highlightStyle = workbook.createCellStyle()
     highlightStyle.fillForegroundColor = color.index
     highlightStyle.fillPattern = FillPatternType.SOLID_FOREGROUND

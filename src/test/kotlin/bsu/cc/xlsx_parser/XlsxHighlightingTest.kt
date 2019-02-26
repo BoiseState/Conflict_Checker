@@ -40,7 +40,7 @@ class XlsxHighlightingTest : WordSpec() {
                 val workbook = readWorkbook(happyPathPath)
                 val highlightRange = (0 until workbook.getSheetAt(DEFAULT_SHEET_INDEX).getRow(rowIndex).lastCellNum).toList()
 
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, 0, color)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), 0, color)
                 val tempWbPath = writeTempWorkbook(workbook)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, 0, highlightRange, color)
             }
@@ -51,7 +51,7 @@ class XlsxHighlightingTest : WordSpec() {
                 val workbook = readWorkbook(happyPathPath)
                 val highlightRange = (0 until workbook.getSheetAt(DEFAULT_SHEET_INDEX).getRow(rowIndices.first).lastCellNum).toList()
                 rowIndices.forEach {rowIndex ->
-                    highlightRow(workbook, DEFAULT_SHEET_INDEX, rowIndex, color)
+                    highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), rowIndex, color)
                 }
                 val tempWbPath = writeTempWorkbook(workbook)
                 rowIndices.forEach { rowIndex ->
@@ -64,8 +64,8 @@ class XlsxHighlightingTest : WordSpec() {
                 val blueIndex = 2
                 val workbook = readWorkbook(happyPathPath)
                 val highlightRange = (0 until workbook.getSheetAt(DEFAULT_SHEET_INDEX).getRow(blueIndex).lastCellNum).toList()
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, redIndex, IndexedColors.RED)
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, blueIndex, IndexedColors.BLUE)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), redIndex, IndexedColors.RED)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), blueIndex, IndexedColors.BLUE)
                 val tempWbPath = writeTempWorkbook(workbook)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, redIndex, highlightRange, IndexedColors.RED)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, blueIndex, highlightRange, IndexedColors.BLUE)
@@ -77,7 +77,7 @@ class XlsxHighlightingTest : WordSpec() {
                 val workbook = readWorkbook(happyPathPath)
                 val highlightRange = (0 until workbook.getSheetAt(DEFAULT_SHEET_INDEX).getRow(0).lastCellNum).toList()
 
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, rowIndex, color)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), rowIndex, color)
                 val tempWbPath = writeTempWorkbook(workbook)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, rowIndex, highlightRange, color)
             }
@@ -87,8 +87,8 @@ class XlsxHighlightingTest : WordSpec() {
                 val longRowIndex = 4
                 val color = IndexedColors.RED
                 val workbook = readWorkbook(unevenRowLengthPath)
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, shortRowIndex, color)
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, longRowIndex, color)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), shortRowIndex, color)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), longRowIndex, color)
                 val tempWbPath = writeTempWorkbook(workbook)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, shortRowIndex, (0 until 3).toList(), color)
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, longRowIndex, (0 until 4).toList(), color)
@@ -101,8 +101,8 @@ class XlsxHighlightingTest : WordSpec() {
                 val longRowIndex = 4
                 val color = IndexedColors.YELLOW
                 val workbook = readWorkbook(unevenRowLengthPath)
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, shortRowIndex, color, true)
-                highlightRow(workbook, DEFAULT_SHEET_INDEX, longRowIndex, color, true)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), shortRowIndex, color, true)
+                highlightRow(workbook.getSheetAt(DEFAULT_SHEET_INDEX), longRowIndex, color, true)
                 val tempWbPath = writeTempWorkbook(workbook)
                 val highlightRange = (0 until 4).toList()
                 verifyHighlighting(tempWbPath, DEFAULT_SHEET_INDEX, shortRowIndex, highlightRange, color)
