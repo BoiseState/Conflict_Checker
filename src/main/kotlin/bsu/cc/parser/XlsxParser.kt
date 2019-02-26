@@ -1,9 +1,5 @@
 package bsu.cc.parser
 
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
@@ -11,6 +7,7 @@ import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.lang.reflect.Type
 import java.util.*
+import org.apache.poi.ss.usermodel.*
 
 
 
@@ -149,3 +146,30 @@ private fun rowToCellMap(row: Row): Map<Int, Cell> {
 
     return output
 }
+
+fun highlightRow(
+        sheet: Sheet,
+        rowIndex: Int,
+        color: IndexedColors,
+        extendToMatchHeader: Boolean = false
+) {
+    val workbook = sheet.workbook
+    val highlightStyle = workbook.createCellStyle()
+    highlightStyle.fillForegroundColor = color.index
+    highlightStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
+    val highlightToCol = if(extendToMatchHeader) sheet.getRow(0).lastCellNum else sheet.getRow(rowIndex).lastCellNum
+    applyStyleToRow(sheet, rowIndex, highlightStyle, highlightToCol)
+}
+
+fun applyStyleToRow(sheet: Sheet, rowIndex: Int, cellStyle: CellStyle, highlightToCol: Short? = null) {
+    val row = sheet.getRow(rowIndex)?: throw IllegalArgumentException("Sheet has no row at given index")
+    val boundIndex = highlightToCol ?: row.lastCellNum
+
+    //Can't use iterator because it skips empty cells
+    (0 until boundIndex).forEach{ index ->
+        val cell = row.getCell(index)?: row.createCell(index)
+        cell.cellStyle = cellStyle
+    }
+}
+
+

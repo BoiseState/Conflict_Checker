@@ -2,9 +2,10 @@ package bsu.cc.parser
 
 import bsu.cc.data_classes.DemoDataClass
 import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.ss.usermodel.IndexedColors
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class DemoParser {
     companion object {
@@ -25,6 +26,14 @@ class DemoParser {
                 println(dClass.field1)
                 println(dClass.field2)
                 println(dClass.field3)
+            }
+        }
+
+        fun highlightTest(fileName: String, sheetIndex: Int = 0) {
+            val workbook = readWorkbook(fileName)
+            highlightRow(workbook.getSheetAt(sheetIndex), 1, IndexedColors.RED, true)
+            FileOutputStream("demo_out.xlsx").use {
+                workbook.write(it)
             }
         }
 
