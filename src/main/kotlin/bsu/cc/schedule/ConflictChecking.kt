@@ -4,6 +4,7 @@ import com.brein.time.timeintervals.collections.ListIntervalCollection
 import com.brein.time.timeintervals.indexes.IntervalTree
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder
 import com.brein.time.timeintervals.indexes.IntervalValueComparator
+import java.util.stream.Collectors
 
 fun buildScheduleIntervalTree(): IntervalTree {
     val tree = IntervalTreeBuilder.newBuilder()
@@ -20,3 +21,8 @@ fun buildScheduleIntervalTree(): IntervalTree {
     }
     return tree
 }
+
+@Suppress("UNCHECKED_CAST")
+fun checkForOverlaps(classes: Collection<ClassSchedule>, tree: IntervalTree): Set<List<ClassSchedule>>
+    = classes.map { tree.overlap(it) }.filter { it.size > 1}.toSet() as Set<List<ClassSchedule>>
+
