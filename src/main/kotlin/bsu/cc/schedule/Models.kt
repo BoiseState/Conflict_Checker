@@ -22,6 +22,10 @@ class ClassSchedule(val startTime: LocalTime,
                     val description: String
                     ) : IInterval<Int> {
 
+    companion object {
+        val xlsxHeaders = listOf("Subject", "Catalog Nbr", "Descr", "Class Section", "Meeting Dates", "Meeting Time/Days", "Room", "Instructors")
+    }
+
     override fun compareTo(other: IInterval<*>?): Int {
         val cmpStart = startTime.toSecondOfDay() - other?.getNormStart() as Int
         if (cmpStart == 0) {

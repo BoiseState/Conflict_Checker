@@ -1,8 +1,11 @@
 package bsu.cc.parser
 
 import bsu.cc.data_classes.DemoDataClass
+import bsu.cc.schedule.classScheduleProducer
 import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.ss.usermodel.Row
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -35,6 +38,23 @@ class DemoParser {
             FileOutputStream("demo_out.xlsx").use {
                 workbook.write(it)
             }
+        }
+
+        fun producerTest(fileName: String, sheetIndex: Int = 0) {
+            val workbook = readWorkbook(fileName)
+            val dataClasses = sheetToDataClasses(
+                    sheet = workbook.getSheetAt(sheetIndex),
+                    dataProducer = ::classScheduleProducer,
+                    ignoreDuplicateHeaders = true,
+                    rowFilter = ::incompleteRowFilter
+            )
+            dataClasses.forEach {
+                println(it)
+            }
+        }
+
+        private fun incompleteRowFilter(row: Row): Boolean {
+            return row.getCell(16)?.cellType?: CellType.BLANK != CellType.BLANK
         }
 
         private fun demoDataClassIndexedProducer(rowMap: Map<Int, Cell>): DemoDataClass {
