@@ -51,7 +51,7 @@ class MainView : View("Conflict Checker") {
                 }
                 button("Print Test") {
                     setOnAction{
-                        DemoParser.demoParse(fileNameField.text)
+                        DemoParser.producerTest(fileNameField.text)
                     }
                 }
                 val greekLetters = listOf("Alpha","Beta",
@@ -70,7 +70,7 @@ class MainView : View("Conflict Checker") {
             hbox {
                 addClass(Styles.footer)
                 label("File Name")
-                fileNameField = textfield(""""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
+                fileNameField = textfield("""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
             }
         }
     }

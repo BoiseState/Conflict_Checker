@@ -18,21 +18,25 @@ fun readWorkbook(fileName: String): XSSFWorkbook {
 fun <T> sheetToDataClasses(
         sheet: Sheet,
         dataProducer: (namedRowMap: Map<String, Cell>) -> T,
-        ignoreDuplicateHeaders: Boolean = false
+        ignoreDuplicateHeaders: Boolean = false,
+        rowFilter: (row: Row) -> Boolean = { _ -> true }
 ): Sequence<T> {
     val headerMap = sheetHeaderMap(sheet)
     fun translatedProducer(indexedRowMap: Map<Int, Cell>): T {
         return dataProducer(indexedToNamedRowMap(indexedRowMap, headerMap, ignoreDuplicateHeaders))
     }
-    return sheetToDataClasses(sheet, ::translatedProducer, true)
+    return sheetToDataClasses(sheet, ::translatedProducer, true, rowFilter)
 }
 
 fun <T> sheetToDataClasses(
         sheet: Sheet,
         dataProducer: (indexedRowMap: Map<Int, Cell>) -> T,
-        excludeHeader: Boolean? = null
+        excludeHeader: Boolean? = null,
+        rowFilter: (row: Row) -> Boolean = { _ -> true }
 ): Sequence<T> {
     return sheet.iterator().asSequence().withIndex().filter { (_, row) ->
+        rowFilter(row)
+    }.filter { (_, row) ->
         row.cellIterator().asSequence().filter{cell -> cell.cellType != CellType.BLANK}.toList().isNotEmpty() //Ignore blank rows
     }.filter { (index, _) ->
         excludeHeader == null || !(excludeHeader && index == 0)
