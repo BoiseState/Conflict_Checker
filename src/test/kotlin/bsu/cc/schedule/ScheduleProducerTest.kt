@@ -22,7 +22,6 @@ class ScheduleProducerTest : WordSpec() {
             val happyPathPath = basePath + "ProducerTestValid.xlsx"
             val invalidFileFormatPath = basePath + "UnevenRowLengths.xlsx"
             val createdFilePath = basePath + "ProdcerCreatedFile.xlsx"
-            val dateFormat = SimpleDateFormat("MM/dd/yyyy")
 
             fun defaultParseWithProducer(filePath: String): List<ClassSchedule> {
                 val sheet = readWorkbook(filePath).getSheetAt(0)
