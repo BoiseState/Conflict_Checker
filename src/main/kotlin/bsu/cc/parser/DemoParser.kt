@@ -19,13 +19,18 @@ class DemoParser {
                     dataProducer = ::demoDataClassIndexedProducer,
                     excludeHeader = true //Ignores the header row
             )
-
             val dClassesFromNamed = sheetToDataClasses(
                     sheet = sheet,
                     dataProducer = ::demoDataClassNamedProducer,
                     ignoreDuplicateHeaders = true
             )
+
             dClassesFromNamed.forEach { dClass ->
+                println(dClass.field1)
+                println(dClass.field2)
+                println(dClass.field3)
+            }
+            dClassesFromIndex.forEach { dClass ->
                 println(dClass.field1)
                 println(dClass.field2)
                 println(dClass.field3)
