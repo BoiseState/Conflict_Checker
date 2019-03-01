@@ -1,6 +1,8 @@
-package bsu.cc.example
+package bsu.cc.schedule
 
-import bsu.cc.schedule.*
+import bsu.cc.constraints.ClassConstraint
+import bsu.cc.constraints.ConstraintPriority
+import io.kotlintest.matchers.boolean.shouldBeFalse
 import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.WordSpec
@@ -74,23 +76,30 @@ class SchedulModelsTest : WordSpec() {
                     (clazz in alone).shouldBeTrue()
                 }
             }
+
+            "be comparable to constraints" {
+                val constraint = ClassConstraint(
+                        id = 1,
+                        priority = ConstraintPriority.PRIORITY,
+                        classes = setOf("cs121", "cs221", "ece230")
+                )
+
+                val hits = listOf(
+                        createDummyClass("CS", "121", "1"),
+                        createDummyClass("Cs", "221", "1"),
+                        createDummyClass("ECe", "230", "1")
+                )
+
+                val misses = listOf(
+                        createDummyClass("CS", "321", "1"),
+                        createDummyClass("Cs", "421", "1"),
+                        createDummyClass("ECe", "330", "1")
+                )
+
+                hits.forEach { constraint.classes.contains(it.classString).shouldBeTrue() }
+                misses.forEach { constraint.classes.contains(it.classString).shouldBeFalse() }
+            }
         }
     }
 }
-
-fun createDummyClass(index: Int, hour1: Int, min1: Int, hour2: Int, min2: Int): ClassSchedule
-    = ClassSchedule(
-        startTime = LocalTime.of(hour1, min1),
-        endTime = LocalTime.of(hour2, min2),
-        meetingDays = setOf(DayOfWeek.MONDAY),
-        meetingDates = DateInterval(
-                LocalDate.ofEpochDay(1),
-                LocalDate.ofEpochDay(2)),
-        subject = "ECE$index",
-        catalogNumber = "330",
-        section = "1",
-        room = "123",
-        instructors = setOf(Instructor("Test", "Joe")),
-        description = "dummy"
-)
 

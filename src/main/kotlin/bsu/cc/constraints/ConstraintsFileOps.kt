@@ -5,14 +5,14 @@ import de.siegmar.fastcsv.writer.CsvWriter
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-fun readConstraintFile(file: File): MutableList<ClassConstraint> {
+fun readConstraintFile(file: File): List<ClassConstraint> {
     val reader = CsvReader()
     val contraints = ArrayList<ClassConstraint>()
 
     reader.read(file, StandardCharsets.UTF_8).rows.map { row ->
         val id = row.originalLineNumber.toInt()
         val priority = createPriorityFrom(row.getField(0).toLowerCase())
-        val classes = ArrayList<String>()
+        val classes = HashSet<String>()
         for (i in 1 until row.fieldCount) {
             classes += row.getField(i).toLowerCase()
         }
@@ -32,7 +32,7 @@ fun writeConstraintsFile(file: File, constraints: List<ClassConstraint>) {
         Array(1 + row.classes.size) { i ->
             when (i) {
                 0 -> row.priority.prettyString
-                else -> row.classes[i - 1]
+                else -> row.classes.elementAt(i - 1)
             }
         }
     }

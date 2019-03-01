@@ -1,5 +1,6 @@
 package bsu.cc.schedule
 
+import bsu.cc.constraints.ClassConstraint
 import com.brein.time.timeintervals.collections.ListIntervalCollection
 import com.brein.time.timeintervals.indexes.IntervalTree
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder
@@ -20,6 +21,23 @@ fun buildScheduleIntervalTree(): IntervalTree {
                 comp.compare(val1.getNormEnd(), val2.getNormEnd()) == 0
     }
     return tree
+}
+
+fun checkConstraints(classes: Collection<ClassSchedule>,
+                     constraints: Collection<ClassConstraint>): Map<ClassConstraint, Set<List<ClassSchedule>>> {
+    val conflicts = HashMap<ClassConstraint, MutableList<ClassSchedule>>()
+    constraints.forEach{ conflicts[it] = ArrayList() }
+
+    classes.forEach { c ->
+        val classString = c.classString
+        constraints.forEach { if (it.classes.contains(classString)) conflicts[it]!!.add(c) }
+    }
+
+    return conflicts.mapValues {  entry ->
+        val tree = buildScheduleIntervalTree()
+        tree.addAll(entry.value)
+        checkForOverlaps(entry.value, tree)
+    }
 }
 
 @Suppress("UNCHECKED_CAST")
