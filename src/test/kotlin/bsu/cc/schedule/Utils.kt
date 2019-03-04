@@ -32,6 +32,23 @@ fun createDummyClass(index: Int, hour1: Int, min1: Int, hour2: Int, min2: Int): 
         description = "dummy"
 )
 
+// for testing date overlaps
+fun createDummyClass(epoch1: Long, epoch2: Long, section: String = "1")
+        = ClassSchedule(
+        startTime = LocalTime.of(1, 0),
+        endTime = LocalTime.of(2, 0),
+        meetingDays = setOf(DayOfWeek.MONDAY),
+        meetingDates = DateInterval(
+                LocalDate.ofEpochDay(epoch1),
+                LocalDate.ofEpochDay(epoch2)),
+        subject = "ECE",
+        catalogNumber = "330",
+        section = section,
+        room = "123",
+        instructors = setOf(Instructor("Test", "Joe")),
+        description = "dummy"
+)
+
 fun timeFrom(str: String): LocalTime {
     val split = str.split(":")
     return LocalTime.of(split[0].toInt(), split[1].toInt())

@@ -10,6 +10,10 @@ data class Instructor(val firstName: String, val lastName: String)
 
 data class DateInterval(val startDate: LocalDate, val endDate: LocalDate)
 
+
+fun DateInterval.overlaps(o: DateInterval): Boolean
+        = startDate <= o.endDate && endDate >= o.startDate
+
 class ClassSchedule(val startTime: LocalTime,
                     val endTime: LocalTime,
                     val meetingDays: Set<DayOfWeek>,

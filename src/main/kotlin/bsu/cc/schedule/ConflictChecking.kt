@@ -40,7 +40,33 @@ fun checkConstraints(classes: Collection<ClassSchedule>,
     }
 }
 
+/**
+ * Brute force method for determining if the classes that conflict in time also conflict in date.
+ * Ideally, the size of a conflict should be very small, making the brute force nature a non issue.
+ */
+fun findDateConflicts(classes: Collection<ClassSchedule>): Set<List<ClassSchedule>> {
+    val conflicts = HashSet<ArrayList<ClassSchedule>>()
+
+    classes.forEach { curr ->
+        val conflict = ArrayList<ClassSchedule>()
+
+        classes.forEach { c ->
+
+            if (curr.meetingDates.overlaps(c.meetingDates)) {
+                conflict.add(c)
+            }
+        }
+
+        if (conflict.size > 1) {
+            conflicts.add(conflict)
+        }
+    }
+
+    return conflicts
+}
+
 @Suppress("UNCHECKED_CAST")
 fun checkForOverlaps(classes: Collection<ClassSchedule>, tree: IntervalTree): Set<List<ClassSchedule>>
-    = classes.map { tree.overlap(it) }.filter { it.size > 1}.toSet() as Set<List<ClassSchedule>>
+    = (classes.map { tree.overlap(it) }.filter { it.size > 1}.toSet() as Set<List<ClassSchedule>>)
+        .flatMap(::findDateConflicts).toSet()
 

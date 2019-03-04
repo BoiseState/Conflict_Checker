@@ -123,6 +123,48 @@ class ConflictCheckingTest : WordSpec() {
                 checkOverlapsAreEqual(conflict, expected).shouldBeTrue()
             }
         }
+
+        "class date ranges" should {
+            "not cause conflicts if no overlap" {
+                val classes = listOf(
+                        createDummyClass(1, 2),
+                        createDummyClass(3, 4),
+                        createDummyClass(5, 6)
+                )
+
+                findDateConflicts(classes).isEmpty().shouldBeTrue()
+            }
+
+            "cause conflicts if there is overlap" {
+                val classes = listOf(
+                        createDummyClass(1, 2),
+                        createDummyClass(2, 3)
+                )
+
+                checkOverlapsAreEqual(findDateConflicts(classes), setOf(classes)).shouldBeTrue()
+            }
+
+            "find multiple conflicts with multiple date ranges: {" {
+                val classes = listOf(
+                        createDummyClass(1, 2, "1"),
+                        createDummyClass(1, 2, "2"),
+                        createDummyClass(3, 4, "1"),
+                        createDummyClass(3, 4, "2")
+                )
+
+                val expected = setOf(
+                        listOf(
+                                classes[0],
+                                classes[1]),
+                        listOf(
+                                classes[2],
+                                classes[3])
+                )
+
+                checkOverlapsAreEqual(findDateConflicts(classes), expected).shouldBeTrue()
+
+            }
+        }
     }
 }
 
