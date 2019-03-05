@@ -4,8 +4,6 @@ import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
 import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
 
 class ConflictCheckingTest : WordSpec() {
     init {
@@ -121,6 +119,71 @@ class ConflictCheckingTest : WordSpec() {
                 val conflict = conflicts.getValue(constraints[0])
 
                 checkOverlapsAreEqual(conflict, expected).shouldBeTrue()
+            }
+
+            "consider days of week" {
+                val classes1 = listOf(
+                        createDummyClass(DayOfWeek.MONDAY, "1"),
+                        createDummyClass(DayOfWeek.MONDAY, "2"),
+                        createDummyClass(DayOfWeek.THURSDAY, "3"),
+                        createDummyClass(DayOfWeek.THURSDAY, "4"),
+                        createDummyClass(DayOfWeek.THURSDAY, "5"),
+                        createDummyClass(DayOfWeek.FRIDAY, "5")
+                )
+
+                val constraints1 = listOf(
+                        createContraint(1, ConstraintPriority.PRIORITY, "ece330")
+                )
+
+                val expected = setOf(
+                        listOf(classes1[0], classes1[1]),
+                        listOf(classes1[2], classes1[3], classes1[4])
+                )
+
+                val conflict = checkConstraints(classes1, constraints1)[constraints1[0]]
+                checkOverlapsAreEqual(conflict!!, expected).shouldBeTrue()
+            }
+        }
+
+        "class date ranges" should {
+            "not cause conflicts if no overlap" {
+                val classes = listOf(
+                        createDummyClass(1, 2),
+                        createDummyClass(3, 4),
+                        createDummyClass(5, 6)
+                )
+
+                findDateConflicts(classes).isEmpty().shouldBeTrue()
+            }
+
+            "cause conflicts if there is overlap" {
+                val classes = listOf(
+                        createDummyClass(1, 2),
+                        createDummyClass(2, 3)
+                )
+
+                checkOverlapsAreEqual(findDateConflicts(classes), setOf(classes)).shouldBeTrue()
+            }
+
+            "find multiple conflicts with multiple date ranges: {" {
+                val classes = listOf(
+                        createDummyClass(1, 2, "1"),
+                        createDummyClass(1, 2, "2"),
+                        createDummyClass(3, 4, "1"),
+                        createDummyClass(3, 4, "2")
+                )
+
+                val expected = setOf(
+                        listOf(
+                                classes[0],
+                                classes[1]),
+                        listOf(
+                                classes[2],
+                                classes[3])
+                )
+
+                checkOverlapsAreEqual(findDateConflicts(classes), expected).shouldBeTrue()
+
             }
         }
     }
