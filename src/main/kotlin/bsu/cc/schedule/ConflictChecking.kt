@@ -31,12 +31,10 @@ fun checkForOverlaps(classes: Collection<ClassSchedule>, tree: IntervalTree): Se
 
 fun checkConstraints(classes: Collection<ClassSchedule>,
                      constraints: Collection<ClassConstraint>): Map<ClassConstraint, Set<List<ClassSchedule>>> {
-    val conflicts = HashMap<ClassConstraint, MutableList<ClassSchedule>>()
-    constraints.forEach{ conflicts[it] = ArrayList() }
+    val conflicts = HashMap<ClassConstraint, List<ClassSchedule>>()
 
-    classes.forEach { c ->
-        val classString = c.classString
-        constraints.forEach { if (it.classes.contains(classString)) conflicts[it]!!.add(c) }
+    constraints.forEach { constraint ->
+        conflicts[constraint] = classes.filter { constraint.classes.contains(it.classString) }.toList()
     }
 
     return conflicts.mapValues {  entry ->

@@ -4,8 +4,6 @@ import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.WordSpec
 import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
 
 class ConflictCheckingTest : WordSpec() {
     init {
@@ -124,7 +122,7 @@ class ConflictCheckingTest : WordSpec() {
             }
 
             "consider days of week" {
-                val classes = listOf(
+                val classes1 = listOf(
                         createDummyClass(DayOfWeek.MONDAY, "1"),
                         createDummyClass(DayOfWeek.MONDAY, "2"),
                         createDummyClass(DayOfWeek.THURSDAY, "3"),
@@ -133,16 +131,16 @@ class ConflictCheckingTest : WordSpec() {
                         createDummyClass(DayOfWeek.FRIDAY, "5")
                 )
 
-                val constraints = listOf(
+                val constraints1 = listOf(
                         createContraint(1, ConstraintPriority.PRIORITY, "ece330")
                 )
 
                 val expected = setOf(
-                        listOf(classes[0], classes[1]),
-                        listOf(classes[2], classes[3], classes[4])
+                        listOf(classes1[0], classes1[1]),
+                        listOf(classes1[2], classes1[3], classes1[4])
                 )
 
-                val conflict = checkConstraints(classes, constraints)[constraints[0]]
+                val conflict = checkConstraints(classes1, constraints1)[constraints1[0]]
                 checkOverlapsAreEqual(conflict!!, expected).shouldBeTrue()
             }
         }
