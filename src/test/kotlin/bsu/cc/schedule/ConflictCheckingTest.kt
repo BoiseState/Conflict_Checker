@@ -122,6 +122,29 @@ class ConflictCheckingTest : WordSpec() {
 
                 checkOverlapsAreEqual(conflict, expected).shouldBeTrue()
             }
+
+            "consider days of week" {
+                val classes = listOf(
+                        createDummyClass(DayOfWeek.MONDAY, "1"),
+                        createDummyClass(DayOfWeek.MONDAY, "2"),
+                        createDummyClass(DayOfWeek.THURSDAY, "3"),
+                        createDummyClass(DayOfWeek.THURSDAY, "4"),
+                        createDummyClass(DayOfWeek.THURSDAY, "5"),
+                        createDummyClass(DayOfWeek.FRIDAY, "5")
+                )
+
+                val constraints = listOf(
+                        createContraint(1, ConstraintPriority.PRIORITY, "ece330")
+                )
+
+                val expected = setOf(
+                        listOf(classes[0], classes[1]),
+                        listOf(classes[2], classes[3], classes[4])
+                )
+
+                val conflict = checkConstraints(classes, constraints)[constraints[0]]
+                checkOverlapsAreEqual(conflict!!, expected).shouldBeTrue()
+            }
         }
 
         "class date ranges" should {

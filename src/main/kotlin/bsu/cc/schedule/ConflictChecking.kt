@@ -5,6 +5,7 @@ import com.brein.time.timeintervals.collections.ListIntervalCollection
 import com.brein.time.timeintervals.indexes.IntervalTree
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder
 import com.brein.time.timeintervals.indexes.IntervalValueComparator
+import java.time.DayOfWeek
 import java.util.stream.Collectors
 
 fun buildScheduleIntervalTree(): IntervalTree {
@@ -23,6 +24,11 @@ fun buildScheduleIntervalTree(): IntervalTree {
     return tree
 }
 
+@Suppress("UNCHECKED_CAST")
+fun checkForOverlaps(classes: Collection<ClassSchedule>, tree: IntervalTree): Set<List<ClassSchedule>>
+        = (classes.map { tree.overlap(it) }.filter { it.size > 1}.toSet() as Set<List<ClassSchedule>>)
+        .flatMap(::findDateConflicts).toSet()
+
 fun checkConstraints(classes: Collection<ClassSchedule>,
                      constraints: Collection<ClassConstraint>): Map<ClassConstraint, Set<List<ClassSchedule>>> {
     val conflicts = HashMap<ClassConstraint, MutableList<ClassSchedule>>()
@@ -34,17 +40,37 @@ fun checkConstraints(classes: Collection<ClassSchedule>,
     }
 
     return conflicts.mapValues {  entry ->
-        val tree = buildScheduleIntervalTree()
-        tree.addAll(entry.value)
-        checkForOverlaps(entry.value, tree)
+        considerDaysOfWeek(entry.value)
     }
+}
+
+internal fun considerDaysOfWeek(classes: List<ClassSchedule>): Set<List<ClassSchedule>> {
+    val dayMap = HashMap<DayOfWeek, MutableList<ClassSchedule>>()
+
+    classes.forEach { c ->
+        c.meetingDays.forEach { day ->
+            val classesOnDay = dayMap.getOrElse(day, ::ArrayList)
+            classesOnDay.add(c)
+            dayMap[day] = classesOnDay
+        }
+    }
+
+    val conflicts = HashSet<List<ClassSchedule>>()
+
+    dayMap.values.forEach { classesOnDay ->
+        val tree = buildScheduleIntervalTree()
+        tree.addAll(classesOnDay)
+        conflicts.addAll(checkForOverlaps(classesOnDay, tree))
+    }
+
+    return conflicts
 }
 
 /**
  * Brute force method for determining if the classes that conflict in time also conflict in date.
  * Ideally, the size of a conflict should be very small, making the brute force nature a non issue.
  */
-fun findDateConflicts(classes: Collection<ClassSchedule>): Set<List<ClassSchedule>> {
+internal fun findDateConflicts(classes: Collection<ClassSchedule>): Set<List<ClassSchedule>> {
     val conflicts = HashSet<ArrayList<ClassSchedule>>()
 
     classes.forEach { curr ->
@@ -65,8 +91,4 @@ fun findDateConflicts(classes: Collection<ClassSchedule>): Set<List<ClassSchedul
     return conflicts
 }
 
-@Suppress("UNCHECKED_CAST")
-fun checkForOverlaps(classes: Collection<ClassSchedule>, tree: IntervalTree): Set<List<ClassSchedule>>
-    = (classes.map { tree.overlap(it) }.filter { it.size > 1}.toSet() as Set<List<ClassSchedule>>)
-        .flatMap(::findDateConflicts).toSet()
 
