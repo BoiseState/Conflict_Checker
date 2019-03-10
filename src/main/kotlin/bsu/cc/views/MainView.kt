@@ -60,7 +60,7 @@ class MainView : View("Conflict Checker") {
                 addClass(Styles.content)
                 borderpane {
                     left {
-                        button("Import File") {
+                        button("Choose File") {
                             setOnAction {
                                 DemoParser.producerTest(fileNameField.text)
                             }
@@ -85,9 +85,13 @@ class MainView : View("Conflict Checker") {
         bottom {
             hbox {
                 addClass(Styles.footer)
-                button("Execute") {
-                    setOnAction{
-                        DemoParser.highlightTest(fileNameField.text)
+                borderpane {
+                    right {
+                        button("Export") {
+                            setOnAction {
+                                println("Exporting...")
+                            }
+                        }
                     }
                 }
             }

@@ -44,9 +44,10 @@ class Styles : Stylesheet() {
                 }
             }
             footer {
-                label {
+                padding = box(0.px,0.px,25.px,25.px)
+                button {
                     textFill = Color.BLACK
-                    padding = box(5.px,10.px)
+                    fontSize = 22.px
                 }
             }
         }
