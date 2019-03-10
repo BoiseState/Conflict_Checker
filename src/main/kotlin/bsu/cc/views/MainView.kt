@@ -11,10 +11,18 @@ import javafx.scene.control.SelectionMode
 import javafx.scene.paint.Color
 import tornadofx.*
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.Period
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
+
+    val conflicts = listOf(
+            Conflict(1, "cs421","Analysis of Algorithms",LocalTime.of(13,15,0)),
+            Conflict(1, "cs410","Databases",LocalTime.of(13,15,0)),
+            Conflict(2, "cs221","Computer Science II",LocalTime.of(9,0,0)),
+            Conflict(2, "cs253","Intro to Systems Programming",LocalTime.of(9,0,0))
+    ).observable()
 
     override val root = borderpane {
         addClass(Styles.welcomeScreen)
@@ -50,34 +58,26 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
-                button("Click me") {
-                    setOnAction {
-                        alert(INFORMATION, "Well done!", "You clicked me!")
+                borderpane {
+                    left {
+                        button("Import File") {
+                            setOnAction {
+                                DemoParser.producerTest(fileNameField.text)
+                            }
+                        }
                     }
-                }
-                button("Print Test") {
-                    setOnAction{
-                        DemoParser.producerTest(fileNameField.text)
+
+                    center {
+                        fileNameField = textfield("""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
                     }
-                }
 
-                val persons = listOf(
-                        Person(1,"Samantha Stuart",LocalDate.of(1981,12,4)),
-                        Person(2,"Tom Marks",LocalDate.of(2001,1,23)),
-                        Person(3,"Stuart Gills",LocalDate.of(1989,5,23)),
-                        Person(3,"Nicole Williams",LocalDate.of(1998,8,11))
-                ).observable()
-
-                tableview(persons) {
-                    column("ID", Person::idProperty)
-                    column("Name", Person::nameProperty)
-                    column("Birthday", Person::birthdayProperty)
-                    column("Age", Person::ageProperty)
-                }
-
-                button("Highlight Test") {
-                    setOnAction{
-                        DemoParser.highlightTest(fileNameField.text)
+                    bottom {
+                        tableview(conflicts) {
+                            column("Conflict ID", Conflict::conflictIdProp)
+                            column("Class ID", Conflict::classNumberProp)
+                            column("Class Name", Conflict::fullNameProp)
+                            column("Start Time", Conflict::timeProp)
+                        }
                     }
                 }
             }
@@ -85,23 +85,29 @@ class MainView : View("Conflict Checker") {
         bottom {
             hbox {
                 addClass(Styles.footer)
-                label("File Name")
-                fileNameField = textfield("""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
+                button("Execute") {
+                    setOnAction{
+                        DemoParser.highlightTest(fileNameField.text)
+                    }
+                }
             }
         }
     }
 }
 
-class Person(id: Int, name: String, birthday: LocalDate) {
-    val idProperty = SimpleIntegerProperty(id)
-    var id by idProperty
+class Conflict(id: Int, classNumber: String, fullName: String, time: LocalTime) {
+    val conflictIdProp = SimpleIntegerProperty(id)
+    var id by conflictIdProp
 
-    val nameProperty = SimpleStringProperty(name)
-    var name by nameProperty
+    val classNumberProp = SimpleStringProperty(classNumber)
+    var classNumber by classNumberProp
 
-    val birthdayProperty = SimpleObjectProperty(birthday)
-    var birthday by birthdayProperty
+    val fullNameProp = SimpleStringProperty(fullName)
+    var fullName by fullNameProp
+
+    val timeProp = SimpleObjectProperty(time)
+    var time by timeProp
 
     // Make age an observable value as well
-    val ageProperty = birthdayProperty.objectBinding { Period.between(it, LocalDate.now()).years }
+    // val ageProperty = birthdayProperty.objectBinding { Period.between(it, LocalDate.now()).years }
 }
