@@ -9,10 +9,12 @@ import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
 import javafx.scene.control.SelectionMode
 import javafx.scene.paint.Color
+import javafx.stage.FileChooser
 import tornadofx.*
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Period
+import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
@@ -62,6 +64,12 @@ class MainView : View("Conflict Checker") {
                     left {
                         button("Choose File") {
                             setOnAction {
+                                if(("" + fileNameField.text().text).trim().length < 1) {
+                                    println("Heck")
+                                    val fileChooser = FileChooser()
+                                    val file = fileChooser.showOpenDialog(null)
+                                    fileNameField.text = file.absolutePath
+                                }
                                 DemoParser.producerTest(fileNameField.text)
                             }
                         }
