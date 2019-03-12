@@ -105,13 +105,14 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
-fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) {
+fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : String {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
     val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
     val highlightedWB = highlightConflictsOnNewSheet(workbook, scheduleSheet, constraints)
     val finalWB = displayConflictsOnNewSheet(highlightedWB, scheduleSheet, constraints)
     writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
+    return "Oh no"
 }
 
 private fun incompleteRowFilter(row: Row): Boolean {

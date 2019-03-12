@@ -2,6 +2,7 @@ package bsu.cc.views
 
 import bsu.cc.Styles
 import bsu.cc.parser.DemoParser
+import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -64,13 +65,9 @@ class MainView : View("Conflict Checker") {
                     left {
                         button("Choose File") {
                             setOnAction {
-                                if(("" + fileNameField.text().text).trim().length < 1) {
-                                    println("Heck")
-                                    val fileChooser = FileChooser()
-                                    val file = fileChooser.showOpenDialog(null)
-                                    fileNameField.text = file.absolutePath
-                                }
-                                DemoParser.producerTest(fileNameField.text)
+                                val file = FileChooser().showOpenDialog(null)
+                                fileNameField.text = file.absolutePath
+                                //DemoParser.producerTest(fileNameField.text)
                             }
                         }
                     }
@@ -95,9 +92,9 @@ class MainView : View("Conflict Checker") {
                 addClass(Styles.footer)
                 borderpane {
                     right {
-                        button("Export") {
+                        button("Process") {
                             setOnAction {
-                                println("Exporting...")
+                                println(identifyAndWriteConflicts(fileNameField.text))
                             }
                         }
                     }
