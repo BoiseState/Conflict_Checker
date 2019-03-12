@@ -19,5 +19,5 @@ fun createPriorityFrom(str: String): ConstraintPriority {
 data class ClassConstraint(
         val id: Int,
         val priority: ConstraintPriority,
-        val classes: List<String>
+        val classes: Set<String>
 )

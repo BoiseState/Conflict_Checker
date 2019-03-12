@@ -10,6 +10,10 @@ data class Instructor(val firstName: String, val lastName: String)
 
 data class DateInterval(val startDate: LocalDate, val endDate: LocalDate)
 
+
+fun DateInterval.overlaps(o: DateInterval): Boolean
+        = startDate <= o.endDate && endDate >= o.startDate
+
 class ClassSchedule(val startTime: LocalTime,
                     val endTime: LocalTime,
                     val meetingDays: Set<DayOfWeek>,
@@ -25,6 +29,9 @@ class ClassSchedule(val startTime: LocalTime,
     companion object {
         val xlsxHeaders = listOf("Subject", "Catalog Nbr", "Descr", "Class Section", "Meeting Dates", "Meeting Time/Days", "Room", "Instructors")
     }
+
+    val classString: String
+        get() = "${subject.toLowerCase()}$catalogNumber"
 
     override fun compareTo(other: IInterval<*>?): Int {
         val cmpStart = startTime.toSecondOfDay() - other?.getNormStart() as Int

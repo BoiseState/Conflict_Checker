@@ -45,16 +45,16 @@ fun classScheduleProducer(rowMap: Map<String, Cell>): ClassSchedule {
     )
 }
 
-fun classScheduleToRow(classSchedule: ClassSchedule, sheet: Sheet, rowIndex: Int) {
+fun classScheduleToRow(classSchedule: ClassSchedule, sheet: Sheet, rowIndex: Int, rowOffset: Int = 0) {
     val row = sheet.createRow(rowIndex)
-    row.createCell(0).setCellValue(classSchedule.subject)
-    row.createCell(1).setCellValue(classSchedule.catalogNumber.toDouble())
-    row.createCell(2).setCellValue(classSchedule.description)
-    row.createCell(3).setCellValue(classSchedule.section.toDouble())
-    row.createCell(4).setCellValue(meetingDatesToString(classSchedule.meetingDates))
-    row.createCell(5).setCellValue(meetingTimeDaysToString(classSchedule.startTime, classSchedule.endTime, classSchedule.meetingDays))
-    row.createCell(6).setCellValue(classSchedule.room)
-    row.createCell(7).setCellValue(classSchedule.instructors.joinToString { "${it.lastName},${it.firstName}, " })
+    row.createCell(0 + rowOffset).setCellValue(classSchedule.subject)
+    row.createCell(1 + rowOffset).setCellValue(classSchedule.catalogNumber.toDouble())
+    row.createCell(2 + rowOffset).setCellValue(classSchedule.description)
+    row.createCell(3 + rowOffset).setCellValue(classSchedule.section.toDouble())
+    row.createCell(4 + rowOffset).setCellValue(meetingDatesToString(classSchedule.meetingDates))
+    row.createCell(5 + rowOffset).setCellValue(meetingTimeDaysToString(classSchedule.startTime, classSchedule.endTime, classSchedule.meetingDays))
+    row.createCell(6 + rowOffset).setCellValue(classSchedule.room)
+    row.createCell(7 + rowOffset).setCellValue(classSchedule.instructors.joinToString { "${it.lastName},${it.firstName}" })
 }
 
 private fun meetingDatesToString(meetingDates: DateInterval): String {
