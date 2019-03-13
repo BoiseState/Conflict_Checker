@@ -71,8 +71,24 @@ fun timeFrom(str: String): LocalTime {
     return LocalTime.of(split[0].toInt(), split[1].toInt())
 }
 
+fun createDummyClass(section: String, start: String, end: String, vararg instructors: Instructor)
+        = ClassSchedule(
+        startTime = timeFrom(start),
+        endTime = timeFrom(end),
+        meetingDays = setOf(DayOfWeek.MONDAY),
+        meetingDates = DateInterval(
+                LocalDate.ofEpochDay(1),
+                LocalDate.ofEpochDay(2)),
+        subject = "cs",
+        catalogNumber = "121",
+        section = section,
+        room = "123",
+        instructors = instructors.toSet(),
+        description = "dummy"
+)
+
 fun createDummyClass(subject: String, catalogNumber: String, section: String,
-                     start: String = "1:00", end: String = "2:00")
+                     start: String = "1:00", end: String = "2:00", room: String = "123")
         = ClassSchedule(
         startTime = timeFrom(start),
         endTime = timeFrom(end),
@@ -83,7 +99,7 @@ fun createDummyClass(subject: String, catalogNumber: String, section: String,
         subject = subject,
         catalogNumber = catalogNumber,
         section = section,
-        room = "123",
+        room = room,
         instructors = setOf(Instructor("Test", "Joe")),
         description = "dummy"
 )
