@@ -42,20 +42,6 @@ fun checkConstraints(classes: Collection<ClassSchedule>,
     }
 }
 
-fun getStringConflicts(classes: Collection<ClassSchedule>,
-                       constraints: Collection<ClassConstraint>): ArrayList<ArrayList<ClassSchedule>> {
-    val conflicts = ArrayList<ArrayList<ClassSchedule>>()
-
-    constraints.forEach {constraint ->
-        val type = ArrayList<ClassSchedule>()
-        val newClasses = classes.filter { constraint.classes.contains(it.classString) }.toList()
-        type.addAll(newClasses)
-        conflicts.add(type)
-    }
-
-    return conflicts
-}
-
 internal fun considerDaysOfWeek(classes: List<ClassSchedule>): Set<List<ClassSchedule>> {
     val dayMap = HashMap<DayOfWeek, MutableList<ClassSchedule>>()
 

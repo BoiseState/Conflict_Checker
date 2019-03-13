@@ -1,6 +1,8 @@
 package bsu.cc.views
 
 import bsu.cc.Styles
+import bsu.cc.constraints.ClassConstraint
+import bsu.cc.constraints.ConstraintPriority
 import bsu.cc.parser.identifyAndWriteConflicts
 import bsu.cc.schedule.classScheduleToRow
 import javafx.beans.property.SimpleIntegerProperty
@@ -10,6 +12,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
 import tornadofx.*
+import java.lang.IllegalStateException
 import java.time.LocalTime
 import java.util.*
 import kotlin.String
@@ -18,7 +21,7 @@ class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
 
     var conflicts = mutableListOf<Conflict>(
-            Conflict(1, "num","Sample Class",LocalTime.of(13,15,0), "room")
+            Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
     ).observable()
 
     override val root = borderpane {
@@ -75,6 +78,7 @@ class MainView : View("Conflict Checker") {
                             isEditable = true
                             column("Conflict ID", Conflict::conflictIdProp).makeEditable()
                             column("Class ID", Conflict::classNumberProp).makeEditable()
+                            column("Priority", Conflict::priorityProp).makeEditable()
                             column("Class Name", Conflict::fullNameProp).makeEditable()
                             column("Start Time", Conflict::timeProp).makeEditable()
                             column("Room", Conflict::roomProp).makeEditable()
@@ -103,11 +107,14 @@ class MainView : View("Conflict Checker") {
         val newConflicts = identifyAndWriteConflicts(fileName)
         val toDisplay = ArrayList<Conflict>()
 
-        var count = 0
-        newConflicts.forEach {list ->
-            val id = ++count
-            list.forEach {entry ->
-                toDisplay.add(Conflict(id,entry.catalogNumber,entry.description,entry.startTime, entry.room))
+        var id = 0
+        newConflicts.keys.forEach { constraint ->
+            val priority = if(constraint.priority.toString().equals("PRIORITY")) "High" else "Low"
+            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
+                id++
+                classSchedules.forEach { entry ->
+                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
+                }
             }
         }
 
@@ -116,12 +123,15 @@ class MainView : View("Conflict Checker") {
     }
 }
 
-class Conflict(id: Int, classNumber: String, fullName: String, time: LocalTime, room: String) {
+class Conflict(id: Int, classNumber: String, priority: String, fullName: String, time: LocalTime, room: String) {
     val conflictIdProp = SimpleIntegerProperty(id)
     var id by conflictIdProp
 
     val classNumberProp = SimpleStringProperty(classNumber)
     var classNumber by classNumberProp
+
+    val priorityProp = SimpleStringProperty(priority)
+    var priority by priorityProp
 
     val fullNameProp = SimpleStringProperty(fullName)
     var fullName by fullNameProp
