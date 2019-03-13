@@ -1,15 +1,11 @@
 package bsu.cc.views
 
-import bsu.cc.Configuration
 import bsu.cc.Styles
-import bsu.cc.parser.highlightConflictsOnNewSheet
 import bsu.cc.parser.DemoParser
-import bsu.cc.parser.displayConflictsOnNewSheet
 import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.scene.control.Alert.AlertType.INFORMATION
 import javafx.scene.control.TextField
 import javafx.scene.control.SelectionMode
-import javafx.stage.FileChooser
 import tornadofx.*
 
 class MainView : View("Conflict Checker") {
@@ -24,12 +20,6 @@ class MainView : View("Conflict Checker") {
                         menu("File") {
                             item("Export", "Shortcut+E").action {
                                 println("Exporting! (TO BE IMPLEMENTED)")
-                            }
-                            item("Select Constraints File").action {
-                                val files = chooseFile("Select Target Directory", arrayOf(FileChooser.ExtensionFilter("CSV Files", "*.csv")))
-                                if(files.isNotEmpty()) {
-                                    Configuration.constraintsFilePath = files[0].absolutePath
-                                }
                             }
                         }
                         menu("Edit") {
