@@ -3,10 +3,7 @@ package bsu.cc.parser
 import bsu.cc.Configuration
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
-import bsu.cc.schedule.ClassSchedule
-import bsu.cc.schedule.checkConstraints
-import bsu.cc.schedule.classScheduleProducer
-import bsu.cc.schedule.classScheduleToRow
+import bsu.cc.schedule.*
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
@@ -105,14 +102,22 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
-fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : String {
+fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : ArrayList<ArrayList<ClassSchedule>> {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
     val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
     val highlightedWB = highlightConflictsOnNewSheet(workbook, scheduleSheet, constraints)
     val finalWB = displayConflictsOnNewSheet(highlightedWB, scheduleSheet, constraints)
     writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
-    return "Oh no"
+
+    val classSchedules = sheetToDataClasses(
+            sheet = scheduleSheet,
+            dataProducer = ::classScheduleProducer,
+            rowFilter = ::incompleteRowFilter,
+            ignoreDuplicateHeaders = true
+    ).toList()
+
+    return getStringConflicts(classSchedules, constraints)
 }
 
 private fun incompleteRowFilter(row: Row): Boolean {

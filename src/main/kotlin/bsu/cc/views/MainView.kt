@@ -1,30 +1,24 @@
 package bsu.cc.views
 
 import bsu.cc.Styles
-import bsu.cc.parser.DemoParser
 import bsu.cc.parser.identifyAndWriteConflicts
+import bsu.cc.schedule.classScheduleToRow
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Alert.AlertType.INFORMATION
+import javafx.collections.FXCollections
 import javafx.scene.control.TextField
-import javafx.scene.control.SelectionMode
-import javafx.scene.paint.Color
 import javafx.stage.FileChooser
 import tornadofx.*
-import java.time.LocalDate
 import java.time.LocalTime
-import java.time.Period
+import java.util.*
 import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
 
-    val conflicts = listOf(
-            Conflict(1, "cs421","Analysis of Algorithms",LocalTime.of(13,15,0)),
-            Conflict(1, "cs410","Databases",LocalTime.of(13,15,0)),
-            Conflict(2, "cs221","Computer Science II",LocalTime.of(9,0,0)),
-            Conflict(2, "cs253","Intro to Systems Programming",LocalTime.of(9,0,0))
+    var conflicts = mutableListOf<Conflict>(
+            Conflict(1, "num","Sample Class",LocalTime.of(13,15,0), "room")
     ).observable()
 
     override val root = borderpane {
@@ -78,10 +72,12 @@ class MainView : View("Conflict Checker") {
 
                     bottom {
                         tableview(conflicts) {
-                            column("Conflict ID", Conflict::conflictIdProp)
-                            column("Class ID", Conflict::classNumberProp)
-                            column("Class Name", Conflict::fullNameProp)
-                            column("Start Time", Conflict::timeProp)
+                            isEditable = true
+                            column("Conflict ID", Conflict::conflictIdProp).makeEditable()
+                            column("Class ID", Conflict::classNumberProp).makeEditable()
+                            column("Class Name", Conflict::fullNameProp).makeEditable()
+                            column("Start Time", Conflict::timeProp).makeEditable()
+                            column("Room", Conflict::roomProp).makeEditable()
                         }
                     }
                 }
@@ -94,7 +90,7 @@ class MainView : View("Conflict Checker") {
                     right {
                         button("Process") {
                             setOnAction {
-                                println(identifyAndWriteConflicts(fileNameField.text))
+                                showConflicts(fileNameField.text)
                             }
                         }
                     }
@@ -102,9 +98,25 @@ class MainView : View("Conflict Checker") {
             }
         }
     }
+
+    fun showConflicts(fileName : String) {
+        val newConflicts = identifyAndWriteConflicts(fileName)
+        val toDisplay = ArrayList<Conflict>()
+
+        var count = 0
+        newConflicts.forEach {list ->
+            val id = ++count
+            list.forEach {entry ->
+                toDisplay.add(Conflict(id,entry.catalogNumber,entry.description,entry.startTime, entry.room))
+            }
+        }
+
+        val toAdd = FXCollections.observableArrayList<Conflict>(toDisplay)
+        conflicts.setAll(toAdd)
+    }
 }
 
-class Conflict(id: Int, classNumber: String, fullName: String, time: LocalTime) {
+class Conflict(id: Int, classNumber: String, fullName: String, time: LocalTime, room: String) {
     val conflictIdProp = SimpleIntegerProperty(id)
     var id by conflictIdProp
 
@@ -116,6 +128,9 @@ class Conflict(id: Int, classNumber: String, fullName: String, time: LocalTime) 
 
     val timeProp = SimpleObjectProperty(time)
     var time by timeProp
+
+    val roomProp = SimpleStringProperty(room)
+    var room by roomProp
 
     // Make age an observable value as well
     // val ageProperty = birthdayProperty.objectBinding { Period.between(it, LocalDate.now()).years }
