@@ -16,6 +16,7 @@ import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
+    private val CONSTRAINT_PATH_KEY = "constraintsFilePath"
 
     var conflicts = mutableListOf<Conflict>(
             Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
@@ -28,7 +29,17 @@ class MainView : View("Conflict Checker") {
                 top {
                     menubar {
                         menu("File") {
+                            item("Choose Constraints File").action {
+                                val fileList = chooseFile("Constraints File", arrayOf(FileChooser.ExtensionFilter("CSV", "*.csv")), FileChooserMode.Single)
+                                if(fileList.isNotEmpty()) {
+                                    with(config) {
+                                        set(CONSTRAINT_PATH_KEY to fileList[0].absolutePath)
+                                        save()
+                                    }
+                                }
+                            }
                             item("Export", "Shortcut+E").action {
+                                println("Constraint file path is ${config[CONSTRAINT_PATH_KEY]}")
                                 println("Exporting! (TO BE IMPLEMENTED)")
                             }
                         }
