@@ -1,5 +1,6 @@
 package bsu.cc.parser
 
+import bsu.cc.Configuration
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
 import bsu.cc.schedule.*
@@ -90,9 +91,6 @@ fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<Class
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
     val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
-    val highlightedWB = highlightConflictsOnNewSheet(workbook, scheduleSheet, constraints)
-    val finalWB = displayConflictsOnNewSheet(highlightedWB, scheduleSheet, constraints)
-    writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
 
     val classSchedules = sheetToDataClasses(
             sheet = scheduleSheet,
@@ -100,6 +98,10 @@ fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<Class
             rowFilter = ::incompleteRowFilter,
             ignoreDuplicateHeaders = true
     ).toList()
+
+    val highlightedWB = highlightConflictsOnNewSheet(workbook, classSchedules, constraints)
+    val finalWB = displayConflictsOnNewSheet(highlightedWB, classSchedules, constraints)
+    writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
 
     return checkConstraints(classSchedules, constraints)
 }
