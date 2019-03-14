@@ -1,10 +1,7 @@
 package bsu.cc.views
 
 import bsu.cc.Styles
-import bsu.cc.constraints.ClassConstraint
-import bsu.cc.constraints.ConstraintPriority
 import bsu.cc.parser.identifyAndWriteConflicts
-import bsu.cc.schedule.classScheduleToRow
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -70,7 +67,7 @@ class MainView : View("Conflict Checker") {
                     }
 
                     center {
-                        fileNameField = textfield("""src\main\resources\Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField = textfield("""..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx""")
                     }
 
                     bottom {
