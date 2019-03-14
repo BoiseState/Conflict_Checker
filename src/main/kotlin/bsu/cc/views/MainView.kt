@@ -71,8 +71,9 @@ class MainView : View("Conflict Checker") {
                         button("Choose File") {
                             setOnAction {
                                 val file = FileChooser().showOpenDialog(null)
-                                fileNameField.text = file.absolutePath
-                                //DemoParser.producerTest(fileNameField.text)
+                                if (file != null) {
+                                    fileNameField.text = file.absolutePath
+                                }
                             }
                         }
                     }
