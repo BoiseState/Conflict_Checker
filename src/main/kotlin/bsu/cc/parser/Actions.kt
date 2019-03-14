@@ -1,13 +1,11 @@
 package bsu.cc.parser
 
-import bsu.cc.Configuration
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
 import bsu.cc.schedule.*
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
@@ -23,13 +21,7 @@ val colorSet = setOf(
         IndexedColors.LIGHT_TURQUOISE
 )
 
-fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, scheduleSheet: XSSFSheet, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val classSchedules = sheetToDataClasses(
-            sheet = scheduleSheet,
-            dataProducer = ::classScheduleProducer,
-            rowFilter = ::incompleteRowFilter,
-            ignoreDuplicateHeaders = true
-    ).toList()
+fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val conflicts = checkConstraints(classSchedules, constraints)
 
     val conflictsSheet = workbook.createSheet("Conflicts")
@@ -60,15 +52,8 @@ fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, scheduleSheet: XSSFSheet,
     return workbook
 }
 
-fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, scheduleSheet: XSSFSheet, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val classSchedules = sheetToDataClasses(
-            sheet = scheduleSheet,
-            dataProducer = ::classScheduleProducer,
-            rowFilter = ::incompleteRowFilter,
-            ignoreDuplicateHeaders = true
-    ).toList()
+fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val conflicts = checkConstraints(classSchedules, constraints)
-    conflicts.keys.forEach{ key -> println("$key : ${conflicts[key]}")}
 
     val constraintColorMap = constraints.mapIndexed { index, classConstraint ->
         Pair(classConstraint, colorSet.elementAt(index % colorSet.size))
@@ -76,7 +61,6 @@ fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, scheduleSheet: XSSFShee
 
     val highlightSheet = workbook.createSheet("Highlighted Schedule")
     val headerRow = highlightSheet.createRow(0)
-
     ClassSchedule.xlsxHeaders.withIndex().forEach{ (index, header) ->
         headerRow.createCell(index).setCellValue(header)
     }

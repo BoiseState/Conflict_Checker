@@ -145,6 +145,78 @@ class ConflictCheckingTest : WordSpec() {
             }
         }
 
+        "instructors" should {
+            "not have conflicts if no overlaps" {
+                val classes = listOf(
+                        createDummyClass("1", "1:00", "2:00",
+                                Instructor("a", "A"), Instructor("b", "B")),
+                        createDummyClass("2", "1:00", "2:00",
+                                Instructor("c", "C"))
+                )
+
+                checkInstructors(classes).isEmpty().shouldBeTrue()
+            }
+
+            "have conflicts if overlaps" {
+                val classes = listOf(
+                        createDummyClass("1", "1:00", "2:00",
+                                Instructor("a", "A"), Instructor("b", "B")),
+                        createDummyClass("2", "1:00", "2:00",
+                                Instructor("a", "A")),
+                        createDummyClass("3", "1:00", "2:00",
+                                Instructor("b", "B"))
+                )
+
+                val expected1 = setOf(
+                        listOf(classes[0], classes[1])
+                )
+                val expected2 = setOf(
+                        listOf(classes[0], classes[2])
+                )
+
+                val conflicts = checkInstructors(classes)
+                conflicts.size.shouldBe(2)
+                checkOverlapsAreEqual(conflicts.getValue(Instructor("a", "A")), expected1).shouldBeTrue()
+                checkOverlapsAreEqual(conflicts.getValue(Instructor("b", "B")), expected2).shouldBeTrue()
+            }
+        }
+
+        "rooms" should {
+            "not have conflicts if no overlaps" {
+                val classes = listOf(
+                        createDummyClass("cs", "121", "1", room = "a"),
+                        createDummyClass("cs", "121", "1", room = "b"),
+                        createDummyClass("cs", "121", "1", room = "c")
+                )
+
+                checkRooms(classes).isEmpty().shouldBeTrue()
+            }
+
+            "have conflicts if overlaps" {
+                val classes = listOf(
+                        createDummyClass("cs", "121", "1", "1:00", "2:00", "a"),
+                        createDummyClass("cs", "121", "2", "1:30", "2:30", "a"),
+                        createDummyClass("cs", "121", "3", "4:00", "5:00", "b"),
+                        createDummyClass("cs", "121", "4", "4:20", "5:00", "b"),
+                        createDummyClass("cs", "121", "5", "3:20", "3:30", "c")
+                )
+
+                val expectedA = setOf(
+                        listOf(classes[0], classes[1])
+                )
+
+                val expectedB = setOf(
+                        listOf(classes[2], classes[3])
+                )
+
+                val conflicts = checkRooms(classes)
+
+                conflicts.size.shouldBe(2)
+                checkOverlapsAreEqual(conflicts.getValue("a"), expectedA).shouldBeTrue()
+                checkOverlapsAreEqual(conflicts.getValue("b"), expectedB).shouldBeTrue()
+            }
+        }
+
         "class date ranges" should {
             "not cause conflicts if no overlap" {
                 val classes = listOf(
