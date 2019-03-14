@@ -1,11 +1,9 @@
 package bsu.cc.parser
 
+import bsu.cc.Configuration
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
-import bsu.cc.schedule.ClassSchedule
-import bsu.cc.schedule.checkConstraints
-import bsu.cc.schedule.classScheduleProducer
-import bsu.cc.schedule.classScheduleToRow
+import bsu.cc.schedule.*
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
@@ -89,20 +87,23 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
-fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) {
+fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<ClassConstraint, Set<List<ClassSchedule>>> {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
-    val classSchedulesList = sheetToDataClasses(
+    val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
+
+    val classSchedules = sheetToDataClasses(
             sheet = scheduleSheet,
             dataProducer = ::classScheduleProducer,
             rowFilter = ::incompleteRowFilter,
             ignoreDuplicateHeaders = true
     ).toList()
-    //TODO: Update this to read from config when that PR is merged
-    val constraints = readConstraintFile(File("""C:\Users\CalebsLaptop\IdeaProjects\Conflict_Checker\src\test\resources\csv\valid.csv"""))
-    val highlightedWB = highlightConflictsOnNewSheet(workbook, classSchedulesList, constraints)
-    val finalWB = displayConflictsOnNewSheet(highlightedWB, classSchedulesList, constraints)
-    writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Conflicts.xlsx" )
+
+    val highlightedWB = highlightConflictsOnNewSheet(workbook, classSchedules, constraints)
+    val finalWB = displayConflictsOnNewSheet(highlightedWB, classSchedules, constraints)
+    writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
+
+    return checkConstraints(classSchedules, constraints)
 }
 
 private fun incompleteRowFilter(row: Row): Boolean {
