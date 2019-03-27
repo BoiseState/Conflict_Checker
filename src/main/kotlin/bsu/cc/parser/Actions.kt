@@ -1,6 +1,6 @@
 package bsu.cc.parser
 
-import bsu.cc.Configuration
+import bsu.cc.ConfigurationKeys
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
 import bsu.cc.schedule.*
@@ -24,7 +24,9 @@ val colorSet = setOf(
 )
 
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val conflicts = checkConstraints(classSchedules, constraints)
+    val instructorConflicts = checkInstructors(classSchedules)
+    val roomConflicts = checkRooms(classSchedules)
+    val constraintConflicts = checkConstraints(classSchedules, constraints)
 
     val conflictsSheet = workbook.createSheet("Conflicts")
     val headerRow = conflictsSheet.createRow(0)
@@ -34,18 +36,22 @@ fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Clas
     }
 
     var rowIndex = 1
-    conflicts.keys.forEach { constraint ->
-        val constraintRow = conflictsSheet.createRow(rowIndex++)
-        constraintRow.createCell(0).setCellValue(constraint.classes.joinToString())
-        var conflictIndex = 1
-        (conflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-            val conflictRow = conflictsSheet.createRow(rowIndex++)
-            conflictRow.createCell(1).setCellValue("Conflict ${conflictIndex++}")
-            classSchedules.forEach { classSchedule ->
-                classScheduleToRow(classSchedule, conflictsSheet, rowIndex++, 2)
-            }
-        }
-    }
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", instructorConflicts.mapKeys { "${it.key.lastName}, ${it.key.firstName}" })
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", roomConflicts)
+    addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", constraintConflicts.mapKeys { it.key.classes.joinToString() })
+
+//    conflicts.keys.forEach { constraint ->
+//        val constraintRow = conflictsSheet.createRow(rowIndex++)
+//        constraintRow.createCell(0).setCellValue(constraint.classes.joinToString())
+//        var conflictIndex = 1
+//        (conflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
+//            val conflictRow = conflictsSheet.createRow(rowIndex++)
+//            conflictRow.createCell(1).setCellValue("Conflict ${conflictIndex++}")
+//            classSchedules.forEach { classSchedule ->
+//                classScheduleToRow(classSchedule, conflictsSheet, rowIndex++, 2)
+//            }
+//        }
+//    }
 
     0.rangeTo(headerRow.lastCellNum).forEach { colIndex ->
         conflictsSheet.autoSizeColumn(colIndex)
@@ -53,6 +59,28 @@ fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Clas
 
     return workbook
 }
+
+fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, conflicts: Map<String, Set<List<ClassSchedule>>>): Int {
+    var index = startIndex
+    val header = sheet.createRow(index)
+    header.createCell(0).setCellValue(headerName)
+    index += 2 //One blank row of padding
+
+    conflicts.filterValues { it.isNotEmpty() }.keys.forEach{ key ->
+        val constraintRow = sheet.createRow(index++)
+        constraintRow.createCell(0).setCellValue(key)
+        var conflictIndex = 1
+        (conflicts[key]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
+            val conflictRow = sheet.createRow(index++)
+            conflictRow.createCell(1).setCellValue("Conflict ${conflictIndex++}")
+            classSchedules.forEach { classSchedule ->
+                classScheduleToRow(classSchedule, sheet, index++, 2)
+            }
+        }
+    }
+    return index
+}
+
 
 fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val conflicts = checkConstraints(classSchedules, constraints)
@@ -91,7 +119,7 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
 fun identifyAndWriteConflicts(fileName: String, config: ConfigProperties, sheetIndex: Int = 0) : String {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
-    val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
+    val constraints = readConstraintFile(File(config[ConfigurationKeys.CONSTRAINT_PATH_KEY].toString()))
 
     val classSchedules = sheetToDataClasses(
             sheet = scheduleSheet,
