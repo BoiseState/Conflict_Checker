@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import tornadofx.ConfigProperties
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
@@ -87,7 +88,7 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
-fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<ClassConstraint, Set<List<ClassSchedule>>> {
+fun identifyAndWriteConflicts(fileName: String, config: ConfigProperties, sheetIndex: Int = 0) : String {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
     val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
@@ -101,9 +102,10 @@ fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<Class
 
     val highlightedWB = highlightConflictsOnNewSheet(workbook, classSchedules, constraints)
     val finalWB = displayConflictsOnNewSheet(highlightedWB, classSchedules, constraints)
-    writeWorkbook(finalWB, fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx" )
+    val newFileName = fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx"
+    writeWorkbook(finalWB,  newFileName)
 
-    return checkConstraints(classSchedules, constraints)
+    return newFileName
 }
 
 private fun incompleteRowFilter(row: Row): Boolean {

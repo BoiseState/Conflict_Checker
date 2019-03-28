@@ -9,6 +9,8 @@ import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
 import tornadofx.*
+import java.awt.Desktop
+import java.io.File
 import java.lang.IllegalStateException
 import java.time.LocalTime
 import java.util.*
@@ -103,7 +105,7 @@ class MainView : View("Conflict Checker") {
                     right {
                         button("Process") {
                             setOnAction {
-                                showConflicts(fileNameField.text)
+                                showConflicts(fileNameField.text, config)
                             }
                         }
                     }
@@ -112,23 +114,9 @@ class MainView : View("Conflict Checker") {
         }
     }
 
-    fun showConflicts(fileName : String) {
-        val newConflicts = identifyAndWriteConflicts(fileName)
-        val toDisplay = ArrayList<Conflict>()
-
-        var id = 0
-        newConflicts.keys.forEach { constraint ->
-            val priority = if(constraint.priority.toString().equals("PRIORITY")) "High" else "Low"
-            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-                id++
-                classSchedules.forEach { entry ->
-                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
-                }
-            }
-        }
-
-        val toAdd = FXCollections.observableArrayList<Conflict>(toDisplay)
-        conflicts.setAll(toAdd)
+    fun showConflicts(fileName : String, config: ConfigProperties) {
+        val outputFile = File(identifyAndWriteConflicts(fileName, config))
+        Desktop.getDesktop().open(outputFile)
     }
 }
 
