@@ -17,10 +17,29 @@ import kotlin.String
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
     private val CONSTRAINT_PATH_KEY = "constraintsFilePath"
+    private val CONSTRAINT_DIR_KEY = "constraintsDirPath"
+
+    val constraintsPicker = FileDropDownFragment("Constraints: ",
+            """..\..\..\src\main\resources\""" ) { path ->
+        with(config) {
+            if (path != null) {
+                set(CONSTRAINT_PATH_KEY to path.toAbsolutePath().toString())
+                save()
+            }
+        }
+    }
 
     var conflicts = mutableListOf<Conflict>(
             Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
     ).observable()
+
+    init {
+        with (config) {
+            set(CONSTRAINT_PATH_KEY to """"..\..\..\src\main\resources\conflicts.csv""")
+            set(CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
+            save()
+        }
+    }
 
     override val root = borderpane {
         addClass(Styles.welcomeScreen)
@@ -66,6 +85,7 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
+                add(constraintsPicker)
                 borderpane {
                     left {
                         button("Choose File") {
@@ -113,7 +133,8 @@ class MainView : View("Conflict Checker") {
     }
 
     fun showConflicts(fileName : String) {
-        val newConflicts = identifyAndWriteConflicts(fileName)
+        val newConflicts = identifyAndWriteConflicts(fileName,
+                config.getProperty(CONSTRAINT_PATH_KEY))
         val toDisplay = ArrayList<Conflict>()
 
         var id = 0

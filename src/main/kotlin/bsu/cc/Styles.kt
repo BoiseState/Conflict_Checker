@@ -15,11 +15,15 @@ class Styles : Stylesheet() {
         val content by cssclass()
         val heading by cssclass()
         val footer by cssclass()
+        val fullWidth by cssclass()
 
         val boxHeight = 40.px
     }
 
     init {
+        fullWidth {
+            minWidth = 100.percent
+        }
         welcomeScreen {
             backgroundColor += LinearGradient(0.0, 0.0, 0.0, 1.0, true, CycleMethod.NO_CYCLE, Stop(0.0, c("#ddddde")), Stop(1.0, c("#eeeeee")))
             minWidth = 700.px

@@ -87,10 +87,10 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
-fun identifyAndWriteConflicts(fileName: String, sheetIndex: Int = 0) : Map<ClassConstraint, Set<List<ClassSchedule>>> {
+fun identifyAndWriteConflicts(fileName: String, constraintsFileName: String, sheetIndex: Int = 0) : Map<ClassConstraint, Set<List<ClassSchedule>>> {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
-    val constraints = readConstraintFile(File(Configuration.constraintsFilePath))
+    val constraints = readConstraintFile(File(constraintsFileName))
 
     val classSchedules = sheetToDataClasses(
             sheet = scheduleSheet,
