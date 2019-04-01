@@ -15,6 +15,7 @@ class Styles : Stylesheet() {
         val content by cssclass()
         val heading by cssclass()
         val footer by cssclass()
+        val bold by cssclass()
 
         val boxHeight = 40.px
     }
@@ -49,6 +50,9 @@ class Styles : Stylesheet() {
                     textFill = Color.BLACK
                     fontSize = 22.px
                 }
+            }
+            bold {
+                fontWeight = FontWeight.EXTRA_BOLD
             }
         }
     }

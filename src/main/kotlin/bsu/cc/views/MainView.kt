@@ -5,6 +5,7 @@ import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
@@ -13,14 +14,14 @@ import java.lang.IllegalStateException
 import java.time.LocalTime
 import java.util.*
 import kotlin.String
+import kotlin.collections.ArrayList
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
     private val CONSTRAINT_PATH_KEY = "constraintsFilePath"
-
-    var conflicts = mutableListOf<Conflict>(
-            Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
-    ).observable()
+    private val total = SimpleIntegerProperty()
+    private val priority = SimpleIntegerProperty()
+    private val non = SimpleIntegerProperty()
 
     override val root = borderpane {
         addClass(Styles.welcomeScreen)
@@ -83,14 +84,34 @@ class MainView : View("Conflict Checker") {
                     }
 
                     bottom {
-                        tableview(conflicts) {
-                            isEditable = true
-                            column("Conflict ID", Conflict::conflictIdProp).makeEditable()
-                            column("Class ID", Conflict::classNumberProp).makeEditable()
-                            column("Priority", Conflict::priorityProp).makeEditable()
-                            column("Class Name", Conflict::fullNameProp).makeEditable()
-                            column("Start Time", Conflict::timeProp).makeEditable()
-                            column("Room", Conflict::roomProp).makeEditable()
+                        hbox(80) {
+                            padding = insets(15, 10, 0, 10)
+                            hbox(100) {
+                                hbox(15) {
+                                    label("Total Conflicts") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(total)
+                                    }
+                                }
+                                hbox(15) {
+                                    label("Priority") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(priority)
+                                    }
+                                }
+                                hbox(15) {
+                                    label("Non-priority") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(non)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -114,43 +135,22 @@ class MainView : View("Conflict Checker") {
 
     fun showConflicts(fileName : String) {
         val newConflicts = identifyAndWriteConflicts(fileName)
-        val toDisplay = ArrayList<Conflict>()
 
         var id = 0
+        var priorityCount = 0
+        var nonCount = 0
         newConflicts.keys.forEach { constraint ->
-            val priority = if(constraint.priority.toString().equals("PRIORITY")) "High" else "Low"
-            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-                id++
-                classSchedules.forEach { entry ->
-                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
-                }
-            }
+            if(constraint.priority.toString().equals("PRIORITY")) priorityCount++ else nonCount++
+//            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
+//                id++
+//                classSchedules.forEach { entry ->
+//                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
+//                }
+//            }
         }
 
-        val toAdd = FXCollections.observableArrayList<Conflict>(toDisplay)
-        conflicts.setAll(toAdd)
+        total.value = priorityCount + nonCount
+        priority.value = priorityCount
+        non.value = nonCount
     }
-}
-
-class Conflict(id: Int, classNumber: String, priority: String, fullName: String, time: LocalTime, room: String) {
-    val conflictIdProp = SimpleIntegerProperty(id)
-    var id by conflictIdProp
-
-    val classNumberProp = SimpleStringProperty(classNumber)
-    var classNumber by classNumberProp
-
-    val priorityProp = SimpleStringProperty(priority)
-    var priority by priorityProp
-
-    val fullNameProp = SimpleStringProperty(fullName)
-    var fullName by fullNameProp
-
-    val timeProp = SimpleObjectProperty(time)
-    var time by timeProp
-
-    val roomProp = SimpleStringProperty(room)
-    var room by roomProp
-
-    // Make age an observable value as well
-    // val ageProperty = birthdayProperty.objectBinding { Period.between(it, LocalDate.now()).years }
 }
