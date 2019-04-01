@@ -140,13 +140,12 @@ class MainView : View("Conflict Checker") {
         var priorityCount = 0
         var nonCount = 0
         newConflicts.keys.forEach { constraint ->
-            if(constraint.priority.toString().equals("PRIORITY")) priorityCount++ else nonCount++
-//            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-//                id++
-//                classSchedules.forEach { entry ->
-//                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
-//                }
-//            }
+            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
+                if(constraint.priority.toString().equals("PRIORITY")) priorityCount++ else nonCount++
+                classSchedules.forEach { entry ->
+
+                }
+            }
         }
 
         total.value = priorityCount + nonCount
