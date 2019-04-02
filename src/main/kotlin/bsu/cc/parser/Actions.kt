@@ -18,16 +18,6 @@ import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
-class Actions {
-    companion object {
-        val ConflictTypeColIndex = mapOf(
-                Pair(ConflictType.INSTRUCTOR, 5),
-                Pair(ConflictType.ROOM, 6),
-                Pair(ConflictType.CONSTRAINT, 7)
-        )
-    }
-}
-
 const val MEETING_DATES_CELL_INDEX = 16
 val colorSet = setOf(
         IndexedColors.RED,
@@ -36,17 +26,10 @@ val colorSet = setOf(
         IndexedColors.LIGHT_TURQUOISE
 )
 
-enum class ConflictType {
-    INSTRUCTOR, ROOM, CONSTRAINT
-}
-
-
-
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val instructorConflicts = checkInstructors(classSchedules)
     val roomConflicts = checkRooms(classSchedules)
     val constraintConflicts = checkConstraints(classSchedules, constraints)
-    val cellStyle = workbook.createCellStyle()
 
     val conflictsSheet = workbook.createSheet("Conflicts")
 
@@ -56,7 +39,7 @@ fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Clas
     headerFont.fontHeightInPoints = 24
     headerStyle.setFont(headerFont)
 
-    var rowIndex = 1
+    var rowIndex = 0
     rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", headerStyle, instructorConflicts.mapKeys { "${it.key.lastName}, ${it.key.firstName}" })
     rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", headerStyle, roomConflicts)
     addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", headerStyle, constraintConflicts.mapKeys { it.key.classes.joinToString() })
