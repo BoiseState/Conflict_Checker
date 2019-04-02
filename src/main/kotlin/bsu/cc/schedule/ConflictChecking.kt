@@ -41,7 +41,10 @@ fun checkConstraints(classes: Collection<ClassSchedule>,
 }
 
 fun checkRooms(classes: Collection<ClassSchedule>): Map<String, Set<List<ClassSchedule>>>
-   = classes.groupBy { it.room }.mapValues { considerDaysOfWeek(it.value) }.filterValues { !it.isEmpty() }
+   = classes.groupBy { it.room }
+        .filterKeys { it.trim() != "" }
+        .mapValues { considerDaysOfWeek(it.value) }
+        .filterValues { !it.isEmpty() }
 
 fun checkInstructors(classes: Collection<ClassSchedule>): Map<Instructor, Set<List<ClassSchedule>>> {
     val instructors = HashMap<Instructor, MutableList<ClassSchedule>>()
@@ -53,7 +56,10 @@ fun checkInstructors(classes: Collection<ClassSchedule>): Map<Instructor, Set<Li
         }
     }
 
-    return instructors.mapValues { considerDaysOfWeek(it.value) }.filterValues { !it.isEmpty() }
+    val generalInstructor = Instructor("STAFF", "STAFF")
+    return instructors.filterKeys { it != generalInstructor }
+            .mapValues { considerDaysOfWeek(it.value) }
+            .filterValues { !it.isEmpty() }
 }
 
 internal fun considerDaysOfWeek(classes: List<ClassSchedule>): Set<List<ClassSchedule>> {

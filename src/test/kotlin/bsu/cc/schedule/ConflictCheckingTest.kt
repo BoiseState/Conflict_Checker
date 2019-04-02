@@ -179,6 +179,19 @@ class ConflictCheckingTest : WordSpec() {
                 checkOverlapsAreEqual(conflicts.getValue(Instructor("a", "A")), expected1).shouldBeTrue()
                 checkOverlapsAreEqual(conflicts.getValue(Instructor("b", "B")), expected2).shouldBeTrue()
             }
+
+            "ignore STAFF, STAFF" {
+                val classes = listOf(
+                        createDummyClass("1", "1:00", "2:00",
+                                Instructor("STAFF", "STAFF")),
+                        createDummyClass("2", "1:00", "2:00",
+                                Instructor("STAFF", "STAFF"))
+                )
+
+                val conflicts = checkInstructors(classes)
+                conflicts.isEmpty().shouldBeTrue()
+
+            }
         }
 
         "rooms" should {
@@ -214,6 +227,15 @@ class ConflictCheckingTest : WordSpec() {
                 conflicts.size.shouldBe(2)
                 checkOverlapsAreEqual(conflicts.getValue("a"), expectedA).shouldBeTrue()
                 checkOverlapsAreEqual(conflicts.getValue("b"), expectedB).shouldBeTrue()
+            }
+
+            "ignore blank room names" {
+                val classes = listOf(
+                        createDummyClass("cs", "121", "1", "1:00", "2:00", ""),
+                        createDummyClass("cs", "121", "2", "1:30", "2:30", "")
+                )
+                val conflicts = checkRooms(classes)
+                conflicts.isEmpty().shouldBeTrue()
             }
         }
 
