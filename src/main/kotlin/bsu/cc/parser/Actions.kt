@@ -5,8 +5,11 @@ import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
 import bsu.cc.schedule.*
 import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import tornadofx.ConfigProperties
@@ -14,6 +17,16 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+
+class Actions {
+    companion object {
+        val ConflictTypeColIndex = mapOf(
+                Pair(ConflictType.INSTRUCTOR, 5),
+                Pair(ConflictType.ROOM, 6),
+                Pair(ConflictType.CONSTRAINT, 7)
+        )
+    }
+}
 
 const val MEETING_DATES_CELL_INDEX = 16
 val colorSet = setOf(
@@ -23,48 +36,48 @@ val colorSet = setOf(
         IndexedColors.LIGHT_TURQUOISE
 )
 
+enum class ConflictType {
+    INSTRUCTOR, ROOM, CONSTRAINT
+}
+
+
+
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val instructorConflicts = checkInstructors(classSchedules)
     val roomConflicts = checkRooms(classSchedules)
     val constraintConflicts = checkConstraints(classSchedules, constraints)
+    val cellStyle = workbook.createCellStyle()
 
     val conflictsSheet = workbook.createSheet("Conflicts")
-    val headerRow = conflictsSheet.createRow(0)
-    headerRow.createCell(0).setCellValue("Constraint")
-    ClassSchedule.xlsxHeaders.withIndex().forEach{ (index, header) ->
-        headerRow.createCell(index + 2).setCellValue(header)
-    }
+
+    val headerStyle = workbook.createCellStyle()
+    val headerFont = workbook.createFont()
+    headerFont.fontName = "Arial"
+    headerFont.fontHeightInPoints = 24
+    headerStyle.setFont(headerFont)
 
     var rowIndex = 1
-    rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", instructorConflicts.mapKeys { "${it.key.lastName}, ${it.key.firstName}" })
-    rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", roomConflicts)
-    addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", constraintConflicts.mapKeys { it.key.classes.joinToString() })
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", headerStyle, instructorConflicts.mapKeys { "${it.key.lastName}, ${it.key.firstName}" })
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", headerStyle, roomConflicts)
+    addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", headerStyle, constraintConflicts.mapKeys { it.key.classes.joinToString() })
 
-//    conflicts.keys.forEach { constraint ->
-//        val constraintRow = conflictsSheet.createRow(rowIndex++)
-//        constraintRow.createCell(0).setCellValue(constraint.classes.joinToString())
-//        var conflictIndex = 1
-//        (conflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-//            val conflictRow = conflictsSheet.createRow(rowIndex++)
-//            conflictRow.createCell(1).setCellValue("Conflict ${conflictIndex++}")
-//            classSchedules.forEach { classSchedule ->
-//                classScheduleToRow(classSchedule, conflictsSheet, rowIndex++, 2)
-//            }
-//        }
-//    }
-
-    0.rangeTo(headerRow.lastCellNum).forEach { colIndex ->
+    0.rangeTo(ClassSchedule.xlsxHeaders.size + 3).forEach { colIndex ->
         conflictsSheet.autoSizeColumn(colIndex)
     }
 
     return workbook
 }
 
-fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, conflicts: Map<String, Set<List<ClassSchedule>>>): Int {
-    var index = startIndex
-    val header = sheet.createRow(index)
-    header.createCell(0).setCellValue(headerName)
-    index += 2 //One blank row of padding
+fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, headerStyle: XSSFCellStyle, conflicts: Map<String, Set<List<ClassSchedule>>>): Int {
+    var index = startIndex + 1 //One row of padding
+    val header = sheet.createRow(index++)
+    val headerCell = header.createCell(0)
+    headerCell.setCellValue(headerName)
+    headerCell.cellStyle = headerStyle
+    val colNames = sheet.createRow(index++)
+    ClassSchedule.xlsxHeaders.withIndex().forEach{ (index, header) ->
+        colNames.createCell(index + 2).setCellValue(header)
+    }
 
     conflicts.filterValues { it.isNotEmpty() }.keys.forEach{ key ->
         val constraintRow = sheet.createRow(index++)
