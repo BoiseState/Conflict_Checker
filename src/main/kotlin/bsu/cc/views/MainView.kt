@@ -4,21 +4,14 @@ import bsu.cc.ConfigurationKeys
 import bsu.cc.Styles
 import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableValue
-import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import javafx.stage.FileChooser
-import sun.security.krb5.Config
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File
-import java.time.LocalTime
 import kotlin.String
-import kotlin.collections.ArrayList
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ComboBox
+import javafx.scene.layout.Priority
 import tornadofx.*
 import java.lang.Exception
 import java.nio.file.Files
@@ -25,7 +26,8 @@ class FileDropDownFragment(
         }
         center {
             comboBox = combobox {
-                addClass(Styles.fullWidth)
+                maxWidth = Double.MAX_VALUE
+                hgrow = Priority.ALWAYS
                 items = files
                 onAction = EventHandler<ActionEvent> { onSelect(selectedItem?.path) }
                 addEventHandler(ComboBox.ON_SHOWN) { refreshFiles() }
