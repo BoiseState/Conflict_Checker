@@ -4,10 +4,7 @@ import bsu.cc.ConfigurationKeys
 import bsu.cc.constraints.ClassConstraint
 import bsu.cc.constraints.readConstraintFile
 import bsu.cc.schedule.*
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.Font
-import org.apache.poi.ss.usermodel.IndexedColors
-import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -19,30 +16,32 @@ import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 const val MEETING_DATES_CELL_INDEX = 16
-val colorSet = setOf(
-        IndexedColors.RED,
-        IndexedColors.LIGHT_BLUE,
-        IndexedColors.LIGHT_YELLOW,
-        IndexedColors.LIGHT_TURQUOISE
+
+val ConflictColorMap = mapOf(
+        Pair(ConflictType.INSTRUCTOR, IndexedColors.LIGHT_BLUE),
+        Pair(ConflictType.ROOM, IndexedColors.LIGHT_ORANGE),
+        Pair(ConflictType.CONSTRAINT, IndexedColors.LIGHT_GREEN)
 )
 
+enum class ConflictType {
+    INSTRUCTOR, ROOM, CONSTRAINT
+}
+
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val instructorConflicts = checkInstructors(classSchedules)
+    val instructorConflicts = checkInstructors(classSchedules).mapKeys { "${it.key.lastName}, ${it.key.firstName}" }
     val roomConflicts = checkRooms(classSchedules)
-    val constraintConflicts = checkConstraints(classSchedules, constraints)
+    val constraintConflicts = checkConstraints(classSchedules, constraints).mapKeys { it.key.classes.joinToString() }
 
     val conflictsSheet = workbook.createSheet("Conflicts")
 
-    val headerStyle = workbook.createCellStyle()
-    val headerFont = workbook.createFont()
-    headerFont.fontName = "Arial"
-    headerFont.fontHeightInPoints = 24
-    headerStyle.setFont(headerFont)
+    fun headerStyle(conflictType: ConflictType): XSSFCellStyle {
+        return createHeaderStyle(workbook, conflictType)
+    }
 
     var rowIndex = 0
-    rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", headerStyle, instructorConflicts.mapKeys { "${it.key.lastName}, ${it.key.firstName}" })
-    rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", headerStyle, roomConflicts)
-    addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", headerStyle, constraintConflicts.mapKeys { it.key.classes.joinToString() })
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Instructor Conflicts", headerStyle(ConflictType.INSTRUCTOR), instructorConflicts)
+    rowIndex = addConflicts(conflictsSheet, rowIndex, "Room Conflicts", headerStyle(ConflictType.ROOM), roomConflicts)
+    addConflicts(conflictsSheet, rowIndex, "Constraint Conflicts", headerStyle(ConflictType.CONSTRAINT), constraintConflicts)
 
     0.rangeTo(ClassSchedule.xlsxHeaders.size + 3).forEach { colIndex ->
         conflictsSheet.autoSizeColumn(colIndex)
@@ -51,12 +50,24 @@ fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Clas
     return workbook
 }
 
+internal fun createHeaderStyle(workbook: XSSFWorkbook, conflictType: ConflictType): XSSFCellStyle {
+    val headerStyle = workbook.createCellStyle()
+    val headerFont = workbook.createFont()
+    headerFont.fontName = "Arial"
+    headerFont.fontHeightInPoints = 24
+    headerStyle.setFont(headerFont)
+    headerStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
+    headerStyle.fillForegroundColor = (ConflictColorMap[conflictType]?:IndexedColors.RED).index
+    return headerStyle
+}
+
 fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, headerStyle: XSSFCellStyle, conflicts: Map<String, Set<List<ClassSchedule>>>): Int {
     var index = startIndex + 1 //One row of padding
     val header = sheet.createRow(index++)
     val headerCell = header.createCell(0)
     headerCell.setCellValue(headerName)
     headerCell.cellStyle = headerStyle
+    header.rowStyle = headerStyle
     val colNames = sheet.createRow(index++)
     ClassSchedule.xlsxHeaders.withIndex().forEach{ (index, header) ->
         colNames.createCell(index + 2).setCellValue(header)
@@ -79,11 +90,11 @@ fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, headerSt
 
 
 fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val conflicts = checkConstraints(classSchedules, constraints)
-
-    val constraintColorMap = constraints.mapIndexed { index, classConstraint ->
-        Pair(classConstraint, colorSet.elementAt(index % colorSet.size))
-    }.toMap()
+    val conflicts = listOf(
+        checkInstructors(classSchedules).map { Pair(ConflictType.INSTRUCTOR, it) },
+        checkRooms(classSchedules).map { Pair(ConflictType.ROOM, it) },
+        checkConstraints(classSchedules, constraints).map { Pair(ConflictType.CONSTRAINT, it) }
+    ).flatten()
 
     val highlightSheet = workbook.createSheet("Highlighted Schedule")
     val headerRow = highlightSheet.createRow(0)
@@ -94,9 +105,10 @@ fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Cl
     classSchedules.withIndex().forEach { (index, classSchedule) ->
         val rowIndex = index + 1
         classScheduleToRow(classSchedule, highlightSheet, rowIndex)
-        val violatedConstraints = conflicts.filterKeys { cc -> conflicts[cc]?.flatten()?.contains(classSchedule)?: false }.keys
+        val violatedConstraints = conflicts.filter { (_, conflict) -> conflict.value.flatten().contains(classSchedule) }
         if(violatedConstraints.isNotEmpty()) {
-            highlightRow(highlightSheet, rowIndex, constraintColorMap[violatedConstraints.elementAt(0)]?:IndexedColors.RED)
+            val color = ConflictColorMap[violatedConstraints.sortedBy { it.first }[0].first]?: IndexedColors.RED
+            highlightRow(highlightSheet, rowIndex, color)
         }
     }
     headerRow.firstCellNum.rangeTo(headerRow.lastCellNum).forEach { colIndex ->
