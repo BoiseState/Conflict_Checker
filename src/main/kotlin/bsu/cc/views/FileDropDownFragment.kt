@@ -17,13 +17,14 @@ class FileDropDownFragment(
 ) : Fragment() {
 
     private val files = FXCollections.observableArrayList<PathGUIWrapper>()
+    private var comboBox: ComboBox<PathGUIWrapper> by singleAssign()
 
     override val root = borderpane {
         left {
             label(text)
         }
         center {
-            combobox<PathGUIWrapper> {
+            comboBox = combobox {
                 addClass(Styles.fullWidth)
                 items = files
                 onAction = EventHandler<ActionEvent> { onSelect(selectedItem?.path) }
@@ -31,6 +32,16 @@ class FileDropDownFragment(
             }
         }
     }
+
+
+    fun setSelected(selected: String) {
+        try {
+            comboBox.value = PathGUIWrapper(Paths.get(selected))
+        } catch (e: Exception) {
+            //daddy don't care
+        }
+    }
+
 
     private fun refreshFiles() {
         files.clear()
