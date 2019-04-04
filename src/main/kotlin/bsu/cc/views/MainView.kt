@@ -6,23 +6,50 @@ import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
+import sun.security.krb5.Config
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File
-import java.lang.IllegalStateException
 import java.time.LocalTime
-import java.util.*
 import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
 
+    val constraintsPicker = FileDropDownFragment("Constraints: ",
+            """..\..\..\src\main\resources\""" ) { path ->
+        with(config) {
+            if (path != null) {
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to path.toAbsolutePath().toString())
+                save()
+            }
+        }
+    }
+
     var conflicts = mutableListOf<Conflict>(
             Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
     ).observable()
+
+    init {
+        with (config) {
+            //defaults
+            val path = string(ConfigurationKeys.CONSTRAINT_PATH_KEY)
+            if (path == null) {
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to """..\..\..\src\main\resources\conflicts.csv""")
+            }
+
+            val dir = string(ConfigurationKeys.CONSTRAINT_DIR_KEY)
+            if (dir == null) {
+                set(ConfigurationKeys.CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
+            }
+            save()
+        }
+
+        constraintsPicker.setSelected(config.string(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+        constraintsPicker.dir = config.string(ConfigurationKeys.CONSTRAINT_DIR_KEY)
+    }
 
     override val root = borderpane {
         addClass(Styles.welcomeScreen)
@@ -31,13 +58,14 @@ class MainView : View("Conflict Checker") {
                 top {
                     menubar {
                         menu("File") {
-                            item("Choose Constraints File").action {
-                                val fileList = chooseFile("Constraints File", arrayOf(FileChooser.ExtensionFilter("CSV", "*.csv")), FileChooserMode.Single)
-                                if(fileList.isNotEmpty()) {
+                            item("Choose Constraints Directory").action {
+                                val dir = chooseDirectory()
+                                if(dir != null && dir.isDirectory) {
                                     with(config) {
-                                        set(ConfigurationKeys.CONSTRAINT_PATH_KEY to fileList[0].absolutePath)
+                                        set(ConfigurationKeys.CONSTRAINT_DIR_KEY to dir.absolutePath)
                                         save()
                                     }
+                                    constraintsPicker.dir = dir.absolutePath.toString()
                                 }
                             }
                             item("Export", "Shortcut+E").action {
@@ -68,6 +96,7 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
+                add(constraintsPicker)
                 borderpane {
                     left {
                         button("Choose File") {
@@ -105,7 +134,7 @@ class MainView : View("Conflict Checker") {
                     right {
                         button("Process") {
                             setOnAction {
-                                showConflicts(fileNameField.text, config)
+                                showConflicts(fileNameField.text)
                             }
                         }
                     }
@@ -114,9 +143,10 @@ class MainView : View("Conflict Checker") {
         }
     }
 
-    fun showConflicts(fileName : String, config: ConfigProperties) {
-        val outputFile = File(identifyAndWriteConflicts(fileName, config))
-        Desktop.getDesktop().open(outputFile)
+    fun showConflicts(fileName : String) {
+        val outputFile = identifyAndWriteConflicts(fileName,
+                config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+        Desktop.getDesktop().open(File(outputFile))
     }
 }
 
