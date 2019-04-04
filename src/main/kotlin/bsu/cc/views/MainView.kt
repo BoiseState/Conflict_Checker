@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.scene.control.TextField
+import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
 import tornadofx.*
 import java.awt.Desktop
@@ -25,6 +26,27 @@ class MainView : View("Conflict Checker") {
     ).observable()
 
     override val root = borderpane {
+        setOnDragOver { event ->
+            val dragBoard = event.dragboard
+            if (dragBoard.hasFiles()) {
+                event.acceptTransferModes(TransferMode.LINK)
+            } else {
+                event.consume()
+            }
+        }
+        setOnDragDropped {  event ->
+            val dragBoard = event.dragboard
+            var success = false
+
+            if (dragBoard.hasFiles()) {
+                success = true
+                val file = dragBoard.files[0]
+                fileNameField.text = file.absolutePath
+            }
+
+            event.isDropCompleted = success
+            event.consume()
+        }
         addClass(Styles.welcomeScreen)
         top {
             borderpane {
