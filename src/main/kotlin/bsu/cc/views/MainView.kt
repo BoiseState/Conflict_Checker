@@ -9,24 +9,24 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
+import sun.security.krb5.Config
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File
 import java.lang.IllegalStateException
 import java.time.LocalTime
 import java.util.*
+import javax.security.auth.login.Configuration
 import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
-    private val CONSTRAINT_PATH_KEY = "constraintsFilePath"
-    private val CONSTRAINT_DIR_KEY = "constraintsDirPath"
 
     val constraintsPicker = FileDropDownFragment("Constraints: ",
             """..\..\..\src\main\resources\""" ) { path ->
         with(config) {
             if (path != null) {
-                set(CONSTRAINT_PATH_KEY to path.toAbsolutePath().toString())
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to path.toAbsolutePath().toString())
                 save()
             }
         }
@@ -38,8 +38,8 @@ class MainView : View("Conflict Checker") {
 
     init {
         with (config) {
-            set(CONSTRAINT_PATH_KEY to """"..\..\..\src\main\resources\conflicts.csv""")
-            set(CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
+            set(ConfigurationKeys.CONSTRAINT_PATH_KEY to """"..\..\..\src\main\resources\conflicts.csv""")
+            set(ConfigurationKeys.CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
             save()
         }
     }
@@ -136,23 +136,9 @@ class MainView : View("Conflict Checker") {
     }
 
     fun showConflicts(fileName : String) {
-        val newConflicts = identifyAndWriteConflicts(fileName,
-                config.getProperty(CONSTRAINT_PATH_KEY))
-        val toDisplay = ArrayList<Conflict>()
-
-        var id = 0
-        newConflicts.keys.forEach { constraint ->
-            val priority = if(constraint.priority.toString().equals("PRIORITY")) "High" else "Low"
-            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-                id++
-                classSchedules.forEach { entry ->
-                    toDisplay.add(Conflict(id, entry.catalogNumber, priority, entry.description, entry.startTime, entry.room))
-                }
-            }
-        }
-
-        val toAdd = FXCollections.observableArrayList<Conflict>(toDisplay)
-        conflicts.setAll(toAdd)
+        val outputFile = identifyAndWriteConflicts(fileName,
+                config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+        Desktop.getDesktop().open(File(outputFile))
     }
 }
 

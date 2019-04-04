@@ -1,7 +1,6 @@
 package bsu.cc
 
-class ConfigurationKeys {
-    companion object {
-        const val CONSTRAINT_PATH_KEY = "constraintsFilePath"
-    }
+object ConfigurationKeys {
+    const val CONSTRAINT_PATH_KEY = "constraintsFilePath"
+    const val CONSTRAINT_DIR_KEY = "constraintsDirPath"
 }
