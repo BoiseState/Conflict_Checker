@@ -1,5 +1,6 @@
 package bsu.cc.views
 
+import bsu.cc.ConfigurationKeys
 import bsu.cc.Styles
 import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
@@ -8,39 +9,92 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.scene.control.TextField
+import javafx.scene.input.TransferMode
 import javafx.stage.FileChooser
+import sun.security.krb5.Config
 import tornadofx.*
-import java.lang.IllegalStateException
+import java.awt.Desktop
+import java.io.File
 import java.time.LocalTime
-import java.util.*
 import kotlin.String
 import kotlin.collections.ArrayList
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
-    private val CONSTRAINT_PATH_KEY = "constraintsFilePath"
+
+    val constraintsPicker = FileDropDownFragment("Constraints: ",
+            """..\..\..\src\main\resources\""" ) { path ->
+        with(config) {
+            if (path != null) {
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to path.toAbsolutePath().toString())
+                save()
+            }
+        }
+    }
+
     private val total = SimpleIntegerProperty()
     private val priority = SimpleIntegerProperty()
     private val non = SimpleIntegerProperty()
 
+    init {
+        with (config) {
+            //defaults
+            val path = string(ConfigurationKeys.CONSTRAINT_PATH_KEY)
+            if (path == null) {
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to """..\..\..\src\main\resources\conflicts.csv""")
+            }
+
+            val dir = string(ConfigurationKeys.CONSTRAINT_DIR_KEY)
+            if (dir == null) {
+                set(ConfigurationKeys.CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
+            }
+            save()
+        }
+
+        constraintsPicker.setSelected(config.string(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+        constraintsPicker.dir = config.string(ConfigurationKeys.CONSTRAINT_DIR_KEY)
+    }
+
     override val root = borderpane {
+        setOnDragOver { event ->
+            val dragBoard = event.dragboard
+            if (dragBoard.hasFiles()) {
+                event.acceptTransferModes(TransferMode.LINK)
+            } else {
+                event.consume()
+            }
+        }
+        setOnDragDropped {  event ->
+            val dragBoard = event.dragboard
+            var success = false
+
+            if (dragBoard.hasFiles()) {
+                success = true
+                val file = dragBoard.files[0]
+                fileNameField.text = file.absolutePath
+            }
+
+            event.isDropCompleted = success
+            event.consume()
+        }
         addClass(Styles.welcomeScreen)
         top {
             borderpane {
                 top {
                     menubar {
                         menu("File") {
-                            item("Choose Constraints File").action {
-                                val fileList = chooseFile("Constraints File", arrayOf(FileChooser.ExtensionFilter("CSV", "*.csv")), FileChooserMode.Single)
-                                if(fileList.isNotEmpty()) {
+                            item("Choose Constraints Directory").action {
+                                val dir = chooseDirectory()
+                                if(dir != null && dir.isDirectory) {
                                     with(config) {
-                                        set(CONSTRAINT_PATH_KEY to fileList[0].absolutePath)
+                                        set(ConfigurationKeys.CONSTRAINT_DIR_KEY to dir.absolutePath)
                                         save()
                                     }
+                                    constraintsPicker.dir = dir.absolutePath.toString()
                                 }
                             }
                             item("Export", "Shortcut+E").action {
-                                println("Constraint file path is ${config[CONSTRAINT_PATH_KEY]}")
+                                println("Constraint file path is ${config[ConfigurationKeys.CONSTRAINT_PATH_KEY]}")
                                 println("Exporting! (TO BE IMPLEMENTED)")
                             }
                         }
@@ -67,6 +121,7 @@ class MainView : View("Conflict Checker") {
         center {
             vbox {
                 addClass(Styles.content)
+                add(constraintsPicker)
                 borderpane {
                     left {
                         button("Choose File") {
@@ -134,22 +189,8 @@ class MainView : View("Conflict Checker") {
     }
 
     fun showConflicts(fileName : String) {
-        val newConflicts = identifyAndWriteConflicts(fileName)
-
-        var id = 0
-        var priorityCount = 0
-        var nonCount = 0
-        newConflicts.keys.forEach { constraint ->
-            (newConflicts[constraint]?: throw IllegalStateException("Key does not have value")).forEach { classSchedules ->
-                if(constraint.priority.toString().equals("PRIORITY")) priorityCount++ else nonCount++
-                classSchedules.forEach { entry ->
-
-                }
-            }
-        }
-
-        total.value = priorityCount + nonCount
-        priority.value = priorityCount
-        non.value = nonCount
+        val outputFile = identifyAndWriteConflicts(fileName,
+                config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+        Desktop.getDesktop().open(File(outputFile))
     }
 }
