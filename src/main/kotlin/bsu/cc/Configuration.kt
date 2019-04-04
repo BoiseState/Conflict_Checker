@@ -1,7 +1,7 @@
 package bsu.cc
 
-class Configuration {
+class ConfigurationKeys {
     companion object {
-        var constraintsFilePath = """..\..\..\src\main\resources\conflicts.csv"""
+        const val CONSTRAINT_PATH_KEY = "constraintsFilePath"
     }
 }

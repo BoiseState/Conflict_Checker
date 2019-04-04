@@ -1,5 +1,6 @@
 package bsu.cc.views
 
+import bsu.cc.ConfigurationKeys
 import bsu.cc.Styles
 import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
@@ -9,6 +10,8 @@ import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.stage.FileChooser
 import tornadofx.*
+import java.awt.Desktop
+import java.io.File
 import java.lang.IllegalStateException
 import java.time.LocalTime
 import java.util.*
@@ -52,13 +55,13 @@ class MainView : View("Conflict Checker") {
                                 val fileList = chooseFile("Constraints File", arrayOf(FileChooser.ExtensionFilter("CSV", "*.csv")), FileChooserMode.Single)
                                 if(fileList.isNotEmpty()) {
                                     with(config) {
-                                        set(CONSTRAINT_PATH_KEY to fileList[0].absolutePath)
+                                        set(ConfigurationKeys.CONSTRAINT_PATH_KEY to fileList[0].absolutePath)
                                         save()
                                     }
                                 }
                             }
                             item("Export", "Shortcut+E").action {
-                                println("Constraint file path is ${config[CONSTRAINT_PATH_KEY]}")
+                                println("Constraint file path is ${config[ConfigurationKeys.CONSTRAINT_PATH_KEY]}")
                                 println("Exporting! (TO BE IMPLEMENTED)")
                             }
                         }
