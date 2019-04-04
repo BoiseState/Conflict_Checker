@@ -1,5 +1,6 @@
 package bsu.cc
 
+import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.paint.CycleMethod
 import javafx.scene.paint.LinearGradient
@@ -15,6 +16,7 @@ class Styles : Stylesheet() {
         val content by cssclass()
         val heading by cssclass()
         val footer by cssclass()
+        val bold by cssclass()
         val fullWidth by cssclass()
 
         val boxHeight = 40.px
@@ -48,11 +50,14 @@ class Styles : Stylesheet() {
                 }
             }
             footer {
-                padding = box(0.px,0.px,25.px,25.px)
+                padding = box(0.px,25.px,25.px,25.px)
                 button {
                     textFill = Color.BLACK
                     fontSize = 22.px
                 }
+            }
+            bold {
+                fontWeight = FontWeight.EXTRA_BOLD
             }
         }
     }

@@ -124,6 +124,13 @@ fun writeWorkbook(workbook: XSSFWorkbook, fileName: String) {
     }
 }
 
+data class ConflictStats(
+        val outputFileName: String,
+        val numConstraintConflicts: Int,
+        val numRoomConflicts: Int,
+        val numInstructorConflicts: Int
+)
+
 fun identifyAndWriteConflicts(fileName: String, constraintsFileName: String, sheetIndex: Int = 0) : String {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")

@@ -6,8 +6,11 @@ import bsu.cc.parser.identifyAndWriteConflicts
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ObservableValue
+import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.Priority
 import javafx.stage.FileChooser
 import sun.security.krb5.Config
 import tornadofx.*
@@ -15,6 +18,7 @@ import java.awt.Desktop
 import java.io.File
 import java.time.LocalTime
 import kotlin.String
+import kotlin.collections.ArrayList
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
@@ -29,9 +33,9 @@ class MainView : View("Conflict Checker") {
         }
     }
 
-    var conflicts = mutableListOf<Conflict>(
-            Conflict(1, "num","Priority","Sample Class",LocalTime.of(13,15,0), "room")
-    ).observable()
+    private val total = SimpleIntegerProperty()
+    private val priority = SimpleIntegerProperty()
+    private val non = SimpleIntegerProperty()
 
     init {
         with (config) {
@@ -136,14 +140,34 @@ class MainView : View("Conflict Checker") {
                     }
 
                     bottom {
-                        tableview(conflicts) {
-                            isEditable = true
-                            column("Conflict ID", Conflict::conflictIdProp).makeEditable()
-                            column("Class ID", Conflict::classNumberProp).makeEditable()
-                            column("Priority", Conflict::priorityProp).makeEditable()
-                            column("Class Name", Conflict::fullNameProp).makeEditable()
-                            column("Start Time", Conflict::timeProp).makeEditable()
-                            column("Room", Conflict::roomProp).makeEditable()
+                        hbox(80) {
+                            padding = insets(15, 10, 0, 10)
+                            hbox(100) {
+                                hbox(15) {
+                                    label("Total Conflicts") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(total)
+                                    }
+                                }
+                                hbox(15) {
+                                    label("Priority") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(priority)
+                                    }
+                                }
+                                hbox(15) {
+                                    label("Non-priority") {
+                                        addClass(Styles.bold)
+                                    }
+                                    label("NaN") {
+                                        bind(non)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -152,13 +176,12 @@ class MainView : View("Conflict Checker") {
         bottom {
             hbox {
                 addClass(Styles.footer)
-                borderpane {
-                    right {
-                        button("Process") {
-                            setOnAction {
-                                showConflicts(fileNameField.text)
-                            }
-                        }
+                region {
+                    hgrow = Priority.ALWAYS
+                }
+                button("Process") {
+                    setOnAction {
+                        showConflicts(fileNameField.text)
                     }
                 }
             }
@@ -170,27 +193,4 @@ class MainView : View("Conflict Checker") {
                 config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY))
         Desktop.getDesktop().open(File(outputFile))
     }
-}
-
-class Conflict(id: Int, classNumber: String, priority: String, fullName: String, time: LocalTime, room: String) {
-    val conflictIdProp = SimpleIntegerProperty(id)
-    var id by conflictIdProp
-
-    val classNumberProp = SimpleStringProperty(classNumber)
-    var classNumber by classNumberProp
-
-    val priorityProp = SimpleStringProperty(priority)
-    var priority by priorityProp
-
-    val fullNameProp = SimpleStringProperty(fullName)
-    var fullName by fullNameProp
-
-    val timeProp = SimpleObjectProperty(time)
-    var time by timeProp
-
-    val roomProp = SimpleStringProperty(room)
-    var room by roomProp
-
-    // Make age an observable value as well
-    // val ageProperty = birthdayProperty.objectBinding { Period.between(it, LocalDate.now()).years }
 }
