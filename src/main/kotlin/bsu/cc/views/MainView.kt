@@ -10,6 +10,7 @@ import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.scene.control.TextField
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.Priority
 import javafx.stage.FileChooser
 import sun.security.krb5.Config
 import tornadofx.*
@@ -175,13 +176,12 @@ class MainView : View("Conflict Checker") {
         bottom {
             hbox {
                 addClass(Styles.footer)
-                borderpane {
-                    right {
-                        button("Process") {
-                            setOnAction {
-                                showConflicts(fileNameField.text)
-                            }
-                        }
+                region {
+                    hgrow = Priority.ALWAYS
+                }
+                button("Process") {
+                    setOnAction {
+                        showConflicts(fileNameField.text)
                     }
                 }
             }
