@@ -17,15 +17,20 @@ import java.lang.IllegalStateException
 
 const val MEETING_DATES_CELL_INDEX = 16
 
+enum class ConflictType {
+    INSTRUCTOR, ROOM, CONSTRAINT
+}
+
+val ConflictColumnMap = mapOf<ConflictType, Short>(
+        Pair(ConflictType.INSTRUCTOR, 7),
+        Pair(ConflictType.ROOM, 6),
+        Pair(ConflictType.CONSTRAINT, 2)
+)
 val ConflictColorMap = mapOf(
         Pair(ConflictType.INSTRUCTOR, IndexedColors.LIGHT_BLUE),
         Pair(ConflictType.ROOM, IndexedColors.LIGHT_ORANGE),
         Pair(ConflictType.CONSTRAINT, IndexedColors.LIGHT_GREEN)
 )
-
-enum class ConflictType {
-    INSTRUCTOR, ROOM, CONSTRAINT
-}
 
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val instructorConflicts = checkInstructors(classSchedules).mapKeys { "${it.key.lastName}, ${it.key.firstName}" }
@@ -106,9 +111,9 @@ fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<Cl
         val rowIndex = index + 1
         classScheduleToRow(classSchedule, highlightSheet, rowIndex)
         val violatedConstraints = conflicts.filter { (_, conflict) -> conflict.value.flatten().contains(classSchedule) }
-        if(violatedConstraints.isNotEmpty()) {
-            val color = ConflictColorMap[violatedConstraints.sortedBy { it.first }[0].first]?: IndexedColors.RED
-            highlightRow(highlightSheet, rowIndex, color)
+        violatedConstraints.map{ it.first }.forEach { conflictType ->
+            val color = ConflictColorMap[conflictType]?: IndexedColors.RED
+            highlightRow(highlightSheet, rowIndex, color, colIndex = ConflictColumnMap[conflictType])
         }
     }
     headerRow.firstCellNum.rangeTo(headerRow.lastCellNum).forEach { colIndex ->
