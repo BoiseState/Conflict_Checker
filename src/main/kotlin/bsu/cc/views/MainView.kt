@@ -10,10 +10,12 @@ import javafx.stage.FileChooser
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File
+import java.nio.file.Path
 import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
+    var scheduleFilePath: String = ""
 
     val constraintsPicker = FileDropDownFragment("Constraints: ",
             """..\..\..\src\main\resources\""" ) { path ->
@@ -60,7 +62,8 @@ class MainView : View("Conflict Checker") {
             if (dragBoard.hasFiles()) {
                 success = true
                 val file = dragBoard.files[0]
-                fileNameField.text = file.absolutePath
+                scheduleFilePath = file.absolutePath
+                fileNameField.text = file.name
             }
 
             event.isDropCompleted = success
@@ -117,14 +120,16 @@ class MainView : View("Conflict Checker") {
                             setOnAction {
                                 val file = FileChooser().showOpenDialog(null)
                                 if (file != null) {
-                                    fileNameField.text = file.absolutePath
+                                    scheduleFilePath = file.absolutePath
+                                    fileNameField.text = file.name
                                 }
                             }
                         }
                     }
 
                     center {
-                        fileNameField = textfield("""..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField = textfield("""Spring 2019 Validation Report Example.xlsx""")
+                        scheduleFilePath = """..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx"""
                     }
                 }
             }
@@ -137,7 +142,7 @@ class MainView : View("Conflict Checker") {
                 }
                 button("Process") {
                     setOnAction {
-                        showConflicts(fileNameField.text)
+                        showConflicts(scheduleFilePath)
                     }
                 }
             }
