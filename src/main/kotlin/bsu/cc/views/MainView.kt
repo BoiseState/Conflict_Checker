@@ -3,7 +3,6 @@ package bsu.cc.views
 import bsu.cc.ConfigurationKeys
 import bsu.cc.Styles
 import bsu.cc.parser.identifyAndWriteConflicts
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.scene.control.TextField
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
@@ -25,10 +24,6 @@ class MainView : View("Conflict Checker") {
             }
         }
     }
-
-    private val total = SimpleIntegerProperty()
-    private val priority = SimpleIntegerProperty()
-    private val non = SimpleIntegerProperty()
 
     init {
         with (config) {
@@ -130,38 +125,6 @@ class MainView : View("Conflict Checker") {
 
                     center {
                         fileNameField = textfield("""..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx""")
-                    }
-
-                    bottom {
-                        hbox(80) {
-                            padding = insets(15, 10, 0, 10)
-                            hbox(100) {
-                                hbox(15) {
-                                    label("Total Conflicts") {
-                                        addClass(Styles.bold)
-                                    }
-                                    label("NaN") {
-                                        bind(total)
-                                    }
-                                }
-                                hbox(15) {
-                                    label("Priority") {
-                                        addClass(Styles.bold)
-                                    }
-                                    label("NaN") {
-                                        bind(priority)
-                                    }
-                                }
-                                hbox(15) {
-                                    label("Non-priority") {
-                                        addClass(Styles.bold)
-                                    }
-                                    label("NaN") {
-                                        bind(non)
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
