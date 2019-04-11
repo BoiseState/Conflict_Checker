@@ -127,6 +127,8 @@ class MainView : View("Conflict Checker") {
                     setOnAction {
                         showConflicts(scheduleFilePath)
                     }
+                    tooltip("shortcut: Ctrl-Enter")
+                    shortcut("Shortcut+enter")
                 }
             }
         }
