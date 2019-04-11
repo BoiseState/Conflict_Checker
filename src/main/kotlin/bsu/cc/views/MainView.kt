@@ -85,23 +85,6 @@ class MainView : View("Conflict Checker") {
                                     constraintsPicker.dir = dir.absolutePath.toString()
                                 }
                             }
-                            item("Export", "Shortcut+E").action {
-                                println("Constraint file path is ${config[ConfigurationKeys.CONSTRAINT_PATH_KEY]}")
-                                println("Exporting! (TO BE IMPLEMENTED)")
-                            }
-                        }
-                        menu("Edit") {
-                            item("Copy", "Shortcut+C").action {
-                                println("Copying!")
-                            }
-                            item("Paste", "Shortcut+V").action {
-                                println("Pasting!")
-                            }
-                        }
-                        menu("View") {
-                            item("Theme").action {
-                                println("Theme needs to be implemented")
-                            }
                         }
                     }
                 }
