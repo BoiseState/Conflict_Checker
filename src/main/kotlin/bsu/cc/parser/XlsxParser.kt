@@ -155,22 +155,29 @@ fun highlightRow(
         sheet: Sheet,
         rowIndex: Int,
         color: IndexedColors,
-        extendToMatchHeader: Boolean = false
+        extendToMatchHeader: Boolean = false,
+        colIndex: Short? = null
 ) {
     val workbook = sheet.workbook
     val highlightStyle = workbook.createCellStyle()
     highlightStyle.fillForegroundColor = color.index
     highlightStyle.fillPattern = FillPatternType.SOLID_FOREGROUND
-    val highlightToCol = if(extendToMatchHeader) sheet.getRow(0).lastCellNum else sheet.getRow(rowIndex).lastCellNum
-    applyStyleToRow(sheet, rowIndex, highlightStyle, highlightToCol)
+
+    if(colIndex != null) {
+        applyStyleToRow(sheet, rowIndex, highlightStyle, colIndex, (colIndex + 1).toShort())
+    } else {
+        val highlightToCol = if (extendToMatchHeader) sheet.getRow(0).lastCellNum else sheet.getRow(rowIndex).lastCellNum
+        applyStyleToRow(sheet, rowIndex, highlightStyle, highlightToCol = highlightToCol)
+    }
 }
 
-fun applyStyleToRow(sheet: Sheet, rowIndex: Int, cellStyle: CellStyle, highlightToCol: Short? = null) {
+fun applyStyleToRow(sheet: Sheet, rowIndex: Int, cellStyle: CellStyle, startAtCol: Short? = null, highlightToCol: Short? = null) {
     val row = sheet.getRow(rowIndex)?: throw IllegalArgumentException("Sheet has no row at given index")
     val boundIndex = highlightToCol ?: row.lastCellNum
+    val startIndex = startAtCol ?: 0
 
     //Can't use iterator because it skips empty cells
-    (0 until boundIndex).forEach{ index ->
+    (startIndex until boundIndex).forEach{ index ->
         val cell = row.getCell(index)?: row.createCell(index)
         cell.cellStyle = cellStyle
     }
