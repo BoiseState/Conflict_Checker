@@ -10,10 +10,12 @@ import javafx.stage.FileChooser
 import tornadofx.*
 import java.awt.Desktop
 import java.io.File
+import java.nio.file.Path
 import kotlin.String
 
 class MainView : View("Conflict Checker") {
     var fileNameField: TextField by singleAssign()
+    var scheduleFilePath: String = ""
 
     val constraintsPicker = FileDropDownFragment("Constraints: ",
             """..\..\..\src\main\resources\""" ) { path ->
@@ -60,7 +62,8 @@ class MainView : View("Conflict Checker") {
             if (dragBoard.hasFiles()) {
                 success = true
                 val file = dragBoard.files[0]
-                fileNameField.text = file.absolutePath
+                scheduleFilePath = file.absolutePath
+                fileNameField.text = file.name
             }
 
             event.isDropCompleted = success
@@ -82,23 +85,6 @@ class MainView : View("Conflict Checker") {
                                     constraintsPicker.dir = dir.absolutePath.toString()
                                 }
                             }
-                            item("Export", "Shortcut+E").action {
-                                println("Constraint file path is ${config[ConfigurationKeys.CONSTRAINT_PATH_KEY]}")
-                                println("Exporting! (TO BE IMPLEMENTED)")
-                            }
-                        }
-                        menu("Edit") {
-                            item("Copy", "Shortcut+C").action {
-                                println("Copying!")
-                            }
-                            item("Paste", "Shortcut+V").action {
-                                println("Pasting!")
-                            }
-                        }
-                        menu("View") {
-                            item("Theme").action {
-                                println("Theme needs to be implemented")
-                            }
                         }
                     }
                 }
@@ -111,20 +97,29 @@ class MainView : View("Conflict Checker") {
             vbox {
                 addClass(Styles.content)
                 add(constraintsPicker)
+
                 borderpane {
+                    addClass(Styles.fileChooser)
                     left {
-                        button("Choose File") {
+                        button {
+                            this.label {
+                                addClass(Styles.font)
+                                text = "Choose File"
+                            }
                             setOnAction {
                                 val file = FileChooser().showOpenDialog(null)
                                 if (file != null) {
-                                    fileNameField.text = file.absolutePath
+                                    scheduleFilePath = file.absolutePath
+                                    fileNameField.text = file.name
                                 }
                             }
                         }
                     }
 
                     center {
-                        fileNameField = textfield("""..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField = textfield("""Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField.addClass(Styles.font)
+                        scheduleFilePath = """..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx"""
                     }
                 }
             }
@@ -137,8 +132,10 @@ class MainView : View("Conflict Checker") {
                 }
                 button("Process") {
                     setOnAction {
-                        showConflicts(fileNameField.text)
+                        showConflicts(scheduleFilePath)
                     }
+                    tooltip("shortcut: Ctrl-Enter")
+                    shortcut("Shortcut+enter")
                 }
             }
         }
