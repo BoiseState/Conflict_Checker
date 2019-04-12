@@ -101,8 +101,11 @@ class MainView : View("Conflict Checker") {
                 borderpane {
                     addClass(Styles.fileChooser)
                     left {
-                        button("Choose File") {
-                            addClass(Styles.font)
+                        button {
+                            this.label {
+                                addClass(Styles.font)
+                                text = "Choose File"
+                            }
                             setOnAction {
                                 val file = FileChooser().showOpenDialog(null)
                                 if (file != null) {
