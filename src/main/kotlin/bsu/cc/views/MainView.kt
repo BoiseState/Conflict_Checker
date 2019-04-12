@@ -97,9 +97,12 @@ class MainView : View("Conflict Checker") {
             vbox {
                 addClass(Styles.content)
                 add(constraintsPicker)
+
                 borderpane {
+                    addClass(Styles.fileChooser)
                     left {
                         button("Choose File") {
+                            addClass(Styles.font)
                             setOnAction {
                                 val file = FileChooser().showOpenDialog(null)
                                 if (file != null) {
@@ -112,6 +115,7 @@ class MainView : View("Conflict Checker") {
 
                     center {
                         fileNameField = textfield("""Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField.addClass(Styles.font)
                         scheduleFilePath = """..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx"""
                     }
                 }

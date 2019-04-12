@@ -17,11 +17,16 @@ class Styles : Stylesheet() {
         val heading by cssclass()
         val footer by cssclass()
         val bold by cssclass()
+        val fileChooser by cssclass()
+        val font by cssclass()
 
         val boxHeight = 40.px
     }
 
     init {
+        font {
+            fontSize = 16.pt
+        }
         welcomeScreen {
             backgroundColor += LinearGradient(0.0, 0.0, 0.0, 1.0, true, CycleMethod.NO_CYCLE, Stop(0.0, c("#ddddde")), Stop(1.0, c("#eeeeee")))
             minWidth = 700.px
@@ -30,6 +35,9 @@ class Styles : Stylesheet() {
                 fontSize = 3.em
                 textFill = Color.BLACK
                 fontWeight = FontWeight.BOLD
+            }
+            fileChooser {
+                padding = box(10.px, 0.px)
             }
             content {
                 padding = box(25.px)
