@@ -17,7 +17,8 @@ class ConstraintFileTest : WordSpec() {
             val validFile = File(basePath + "valid.csv")
             val validContents = listOf(
                     ClassConstraint(1, ConstraintPriority.PRIORITY, setOf("cs121", "cs221")),
-                    ClassConstraint(2, ConstraintPriority.NON_PRIORITY, setOf("cs321", "cs421", "cs471"))
+                    ClassConstraint(2, ConstraintPriority.NON_PRIORITY, setOf("cs321", "cs421", "cs471")),
+                    ClassConstraint(3, ConstraintPriority.IGNORE, setOf("cs521", "cs421"))
             )
 
             "not throw error with valid file" {
@@ -81,7 +82,8 @@ class ConstraintFileTest : WordSpec() {
                 val validFile = File(basePath + "valid.csv")
                 val validContents = listOf(
                         ClassConstraint(1, ConstraintPriority.PRIORITY, setOf("cs121", "cs221")),
-                        ClassConstraint(2, ConstraintPriority.NON_PRIORITY, setOf("cs321", "cs421", "cs471"))
+                        ClassConstraint(2, ConstraintPriority.NON_PRIORITY, setOf("cs321", "cs421", "cs471")),
+                        ClassConstraint(3, ConstraintPriority.IGNORE, setOf("cs521", "cs421"))
                 )
 
                 var data = readConstraintFile(validFile)
@@ -91,8 +93,8 @@ class ConstraintFileTest : WordSpec() {
 
                 writeConstraintsFile(outFile, data)
                 data = readConstraintFile(outFile)
-                data.forEachIndexed { index, contsraint ->
-                    contsraint.shouldBe(validContents[index])
+                data.forEachIndexed { index, constraint ->
+                    constraint.shouldBe(validContents[index])
                 }
 
                 if (outFile.exists()) {

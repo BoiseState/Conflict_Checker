@@ -73,9 +73,11 @@ class ConflictCheckingTest : WordSpec() {
 
         "Class Constraint checking" should {
             val constraints = listOf(
-                    createContraint(1, ConstraintPriority.PRIORITY, "cs121", "cs221", "cs321"),
-                    createContraint(1, ConstraintPriority.PRIORITY, "ece230", "cs253"),
-                    createContraint(1, ConstraintPriority.NON_PRIORITY, "math189", "cs221")
+                    createConstraint(1, ConstraintPriority.PRIORITY, "cs121", "cs221", "cs321"),
+                    createConstraint(2, ConstraintPriority.PRIORITY, "ece230", "cs253"),
+                    createConstraint(3, ConstraintPriority.NON_PRIORITY, "math189", "cs221"),
+                    // this constraint should have no effect on output
+                    createConstraint(4, ConstraintPriority.IGNORE, "cs121", "cs221", "cs321")
             )
 
             val classes = setOf(
@@ -132,7 +134,7 @@ class ConflictCheckingTest : WordSpec() {
                 )
 
                 val constraints1 = listOf(
-                        createContraint(1, ConstraintPriority.PRIORITY, "ece330")
+                        createConstraint(1, ConstraintPriority.PRIORITY, "ece330")
                 )
 
                 val expected = setOf(
@@ -154,7 +156,21 @@ class ConflictCheckingTest : WordSpec() {
                                 Instructor("c", "C"))
                 )
 
-                checkInstructors(classes).isEmpty().shouldBeTrue()
+                checkInstructors(classes, emptyList()).isEmpty().shouldBeTrue()
+            }
+
+            "not have conflicts if ignored" {
+                val classes = listOf(
+                        createDummyClass("1", "1:00", "2:00",
+                                Instructor("a", "A")),
+                        createDummyClass("2", "1:00", "2:00",
+                                Instructor("a", "A"))
+                )
+                val constraints = listOf(
+                        createConstraint(1, ConstraintPriority.IGNORE, "cs121")
+                )
+
+                checkInstructors(classes, constraints).isEmpty().shouldBeTrue()
             }
 
             "have conflicts if overlaps" {
@@ -174,7 +190,7 @@ class ConflictCheckingTest : WordSpec() {
                         listOf(classes[0], classes[2])
                 )
 
-                val conflicts = checkInstructors(classes)
+                val conflicts = checkInstructors(classes, emptyList())
                 conflicts.size.shouldBe(2)
                 checkOverlapsAreEqual(conflicts.getValue(Instructor("a", "A")), expected1).shouldBeTrue()
                 checkOverlapsAreEqual(conflicts.getValue(Instructor("b", "B")), expected2).shouldBeTrue()
@@ -188,7 +204,7 @@ class ConflictCheckingTest : WordSpec() {
                                 Instructor("STAFF", "STAFF"))
                 )
 
-                val conflicts = checkInstructors(classes)
+                val conflicts = checkInstructors(classes, emptyList())
                 conflicts.isEmpty().shouldBeTrue()
 
             }
@@ -202,7 +218,20 @@ class ConflictCheckingTest : WordSpec() {
                         createDummyClass("cs", "121", "1", room = "c")
                 )
 
-                checkRooms(classes).isEmpty().shouldBeTrue()
+                checkRooms(classes, emptyList()).isEmpty().shouldBeTrue()
+            }
+
+            "not have conflicts if ignored" {
+                val classes = listOf(
+                        createDummyClass("cs", "121", "1", room = "a"),
+                        createDummyClass("cs", "121", "1", room = "a")
+                )
+
+                val constraints = listOf(
+                        createConstraint(1, ConstraintPriority.IGNORE, "cs121")
+                )
+
+                checkRooms(classes, constraints).isEmpty().shouldBeTrue()
             }
 
             "have conflicts if overlaps" {
@@ -222,7 +251,7 @@ class ConflictCheckingTest : WordSpec() {
                         listOf(classes[2], classes[3])
                 )
 
-                val conflicts = checkRooms(classes)
+                val conflicts = checkRooms(classes, emptyList())
 
                 conflicts.size.shouldBe(2)
                 checkOverlapsAreEqual(conflicts.getValue("a"), expectedA).shouldBeTrue()
@@ -234,7 +263,7 @@ class ConflictCheckingTest : WordSpec() {
                         createDummyClass("cs", "121", "1", "1:00", "2:00", ""),
                         createDummyClass("cs", "121", "2", "1:30", "2:30", "")
                 )
-                val conflicts = checkRooms(classes)
+                val conflicts = checkRooms(classes, emptyList())
                 conflicts.isEmpty().shouldBeTrue()
             }
         }
