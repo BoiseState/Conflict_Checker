@@ -14,8 +14,13 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.security.auth.login.Configuration
 
 const val MEETING_DATES_CELL_INDEX = 16
+const val REPORT_NAME = "ConflictReport"
+const val DATE_FORMAT_STRING = "yyyy.MM.dd"
 
 enum class ConflictType {
     INSTRUCTOR, ROOM, CONSTRAINT
@@ -136,7 +141,7 @@ data class ConflictStats(
         val numInstructorConflicts: Int
 )
 
-fun identifyAndWriteConflicts(fileName: String, constraintsFileName: String, sheetIndex: Int = 0) : String {
+fun identifyAndWriteConflicts(fileName: String, constraintsFileName: String, config: ConfigProperties, sheetIndex: Int = 0) : String {
     val workbook = readWorkbook(fileName)
     val scheduleSheet = workbook.getSheetAt(sheetIndex) ?: throw IllegalArgumentException("No sheet present at given index")
     val constraints = readConstraintFile(File(constraintsFileName))
@@ -150,10 +155,45 @@ fun identifyAndWriteConflicts(fileName: String, constraintsFileName: String, she
 
     val highlightedWB = highlightConflictsOnNewSheet(workbook, classSchedules, constraints)
     val finalWB = displayConflictsOnNewSheet(highlightedWB, classSchedules, constraints)
-    val newFileName = fileName.removeRange((fileName.length - 5) until (fileName.length)) + "Higlighted.xlsx"
+    val newFileName = getNewFileName(config)
+    
     writeWorkbook(finalWB,  newFileName)
 
     return newFileName
+}
+
+private fun getNewFileName(config: ConfigProperties): String {
+    val dateString = SimpleDateFormat(DATE_FORMAT_STRING).format(Date())
+    var index: Int
+    with(config) {
+        val lastDateString = string(ConfigurationKeys.LAST_SAVE_DATE_KEY, "")
+        index = int(ConfigurationKeys.OUTPUT_FILE_INDEX_KEY, 1) ?: 1
+        if(lastDateString != dateString) { index = 1 }
+    }
+
+    if(File(createFileName(dateString, index)).exists()) {
+        val currentDirectory = File(".")
+        val indices = currentDirectory.listFiles()
+                .map{ it.name }
+                .filter{ it.startsWith(dateString) && it.endsWith("$REPORT_NAME.xlsx") }
+                .map{ Regex("""(?:.+?\.){3}(.+?)\.""").find(it) }
+                .map{ it?.groups?.get(1)?.value?.toInt() ?: -1 }
+                .sorted()
+
+        index = IntRange(index, Int.MAX_VALUE).find {!indices.contains(it)} ?: -1
+    }
+
+    with(config) {
+        set(ConfigurationKeys.OUTPUT_FILE_INDEX_KEY to index + 1)
+        set(ConfigurationKeys.LAST_SAVE_DATE_KEY to dateString)
+        save()
+    }
+
+    return createFileName(dateString, index)
+}
+
+private fun createFileName(dateString: String, index: Int): String {
+    return "$dateString.$index.$REPORT_NAME.xlsx"
 }
 
 private fun incompleteRowFilter(row: Row): Boolean {

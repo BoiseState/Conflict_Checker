@@ -143,7 +143,8 @@ class MainView : View("Conflict Checker") {
 
     fun showConflicts(fileName : String) {
         val outputFile = identifyAndWriteConflicts(fileName,
-                config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY))
+                config.getProperty(ConfigurationKeys.CONSTRAINT_PATH_KEY),
+                config)
         Desktop.getDesktop().open(File(outputFile))
     }
 }
