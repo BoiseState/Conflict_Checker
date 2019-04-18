@@ -11,7 +11,7 @@ Kolton Hahn
 Jordan Paoletti
 
 # Velocity
-110 mph all day every day
+110 mph per hour all day every day
 
 # Build
 To build the project, Execute `mvn install` from the top level directory.
@@ -22,7 +22,10 @@ To run only the unit tests, execute `mvn test`.
 
 # Deployment
 
-Instructions here once Jordan merges in his jar wrapper jazz.
+Use `mvn jfx:jar` to create a self contained jar that can easily be ran.
+For easy deployment for windows, use [launch4j](http://launch4j.sourceforge.net/) to wrap the jar in a windows executable.
+Ideally, the program would be distributed with the help documentation.
+
 
 # Architectural Overview
 
