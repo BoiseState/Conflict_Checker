@@ -22,7 +22,7 @@ To run only the unit tests, execute `mvn test`.
 
 # Deployment
 
-Instructions here once Jordan merges in his jar wrapper jazz. 
+Instructions here once Jordan merges in his jar wrapper jazz.
 
 # Architectural Overview
 
