@@ -20,7 +20,10 @@ Priority,CS-HU250,CS271,CS310,CS390,ECE230,ECE330
 Non-priority,CS361,CS430,CS472,CS474,CS457,CS464,CS450,CS436
 ignore,cs436,cs536
 ignore,cs475,cs575
-ignore,cs401,cs569
+ignore,cs401,cs516
 ignore,cs410,cs510
 ignore,cs425,cs525
 ignore,cs402,cs517
+ignore,cs469,cs569
+ignore,cs221,cs505
+ignore,cs441,cs541

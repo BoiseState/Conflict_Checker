@@ -32,12 +32,12 @@ class MainView : View("Conflict Checker") {
             //defaults
             val path = string(ConfigurationKeys.CONSTRAINT_PATH_KEY)
             if (path == null) {
-                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to """..\..\..\src\main\resources\conflicts.csv""")
+                set(ConfigurationKeys.CONSTRAINT_PATH_KEY to """""")
             }
 
             val dir = string(ConfigurationKeys.CONSTRAINT_DIR_KEY)
             if (dir == null) {
-                set(ConfigurationKeys.CONSTRAINT_DIR_KEY to """..\..\..\src\main\resources\""")
+                set(ConfigurationKeys.CONSTRAINT_DIR_KEY to """.""")
             }
             save()
         }
