@@ -52,7 +52,7 @@ class FileDropDownFragment(
         files.clear()
         try {
             files.addAll(Files.newDirectoryStream(Paths.get(dir))
-                    .filter { !it.toFile().isDirectory }
+                    .filter { !it.toFile().isDirectory && it.toString().endsWith(".csv") }
                     .map { PathGUIWrapper(it) })
         } catch (_: Exception) {
             //ignore any exceptions
