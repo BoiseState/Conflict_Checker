@@ -1,6 +1,7 @@
 package bsu.cc.schedule
 
 import bsu.cc.constraints.ClassConstraint
+import bsu.cc.constraints.ConstraintPriority
 import com.brein.time.timeintervals.collections.ListIntervalCollection
 import com.brein.time.timeintervals.indexes.IntervalTree
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder
@@ -33,20 +34,25 @@ fun checkConstraints(classes: Collection<ClassSchedule>,
                      constraints: Collection<ClassConstraint>): Map<ClassConstraint, Set<List<ClassSchedule>>> {
     val conflicts = HashMap<ClassConstraint, List<ClassSchedule>>()
 
-    constraints.forEach { constraint ->
+    constraints.filter { it.priority != ConstraintPriority.IGNORE }.forEach { constraint ->
         conflicts[constraint] = classes.filter { constraint.classes.contains(it.classString) }.toList()
     }
 
     return conflicts.mapValues { considerDaysOfWeek(it.value) }
 }
 
-fun checkRooms(classes: Collection<ClassSchedule>): Map<String, Set<List<ClassSchedule>>>
+
+fun checkRooms(classes: Collection<ClassSchedule>,
+               constraints: Collection<ClassConstraint>): Map<String, Set<List<ClassSchedule>>>
    = classes.groupBy { it.room }
         .filterKeys { it.trim() != "" }
         .mapValues { considerDaysOfWeek(it.value) }
-        .filterValues { !it.isEmpty() }
+        .mapValues { considerIgnoreConstraints(it.value, constraints) }
+        .filterValues {
+            !it.isEmpty() }
 
-fun checkInstructors(classes: Collection<ClassSchedule>): Map<Instructor, Set<List<ClassSchedule>>> {
+fun checkInstructors(classes: Collection<ClassSchedule>,
+                     constraints: Collection<ClassConstraint>): Map<Instructor, Set<List<ClassSchedule>>> {
     val instructors = HashMap<Instructor, MutableList<ClassSchedule>>()
     classes.forEach { c ->
         c.instructors.forEach { instructor ->
@@ -59,7 +65,19 @@ fun checkInstructors(classes: Collection<ClassSchedule>): Map<Instructor, Set<Li
     val generalInstructor = Instructor("STAFF", "STAFF")
     return instructors.filterKeys { it != generalInstructor }
             .mapValues { considerDaysOfWeek(it.value) }
+            .mapValues { considerIgnoreConstraints(it.value, constraints) }
             .filterValues { !it.isEmpty() }
+}
+
+internal fun considerIgnoreConstraints(conflicts: Set<List<ClassSchedule>>,
+                                       constraints: Collection<ClassConstraint>): Set<List<ClassSchedule>> {
+    val ignore = constraints
+            .filter { it.priority == ConstraintPriority.IGNORE }
+            .map{ it.classes }
+
+    return conflicts.filter { conflict ->
+        !ignore.contains(conflict.map { it.classString }.toSet())
+    }.toSet()
 }
 
 internal fun considerDaysOfWeek(classes: List<ClassSchedule>): Set<List<ClassSchedule>> {

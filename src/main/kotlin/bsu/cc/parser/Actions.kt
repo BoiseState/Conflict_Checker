@@ -33,8 +33,8 @@ val ConflictColorMap = mapOf(
 )
 
 fun displayConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
-    val instructorConflicts = checkInstructors(classSchedules).mapKeys { "${it.key.lastName}, ${it.key.firstName}" }
-    val roomConflicts = checkRooms(classSchedules)
+    val instructorConflicts = checkInstructors(classSchedules, constraints).mapKeys { "${it.key.lastName}, ${it.key.firstName}" }
+    val roomConflicts = checkRooms(classSchedules, constraints)
     val constraintConflicts = checkConstraints(classSchedules, constraints).mapKeys { it.key.classes.joinToString() }
 
     val conflictsSheet = workbook.createSheet("Conflicts")
@@ -96,8 +96,8 @@ fun addConflicts(sheet: XSSFSheet, startIndex: Int, headerName: String, headerSt
 
 fun highlightConflictsOnNewSheet(workbook: XSSFWorkbook, classSchedules: List<ClassSchedule>, constraints: List<ClassConstraint>): XSSFWorkbook {
     val conflicts = listOf(
-        checkInstructors(classSchedules).map { Pair(ConflictType.INSTRUCTOR, it) },
-        checkRooms(classSchedules).map { Pair(ConflictType.ROOM, it) },
+        checkInstructors(classSchedules, constraints).map { Pair(ConflictType.INSTRUCTOR, it) },
+        checkRooms(classSchedules, constraints).map { Pair(ConflictType.ROOM, it) },
         checkConstraints(classSchedules, constraints).map { Pair(ConflictType.CONSTRAINT, it) }
     ).flatten()
 

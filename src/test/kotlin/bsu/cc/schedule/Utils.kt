@@ -104,5 +104,5 @@ fun createDummyClass(subject: String, catalogNumber: String, section: String,
         description = "dummy"
 )
 
-fun createContraint(id: Int, priority: ConstraintPriority, vararg classes: String)
+fun createConstraint(id: Int, priority: ConstraintPriority, vararg classes: String)
     = ClassConstraint(id, priority, classes.toSet())
