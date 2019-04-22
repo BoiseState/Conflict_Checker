@@ -117,9 +117,9 @@ class MainView : View("Conflict Checker") {
                     }
 
                     center {
-                        fileNameField = textfield("""Spring 2019 Validation Report Example.xlsx""")
+                        fileNameField = textfield("""""")
                         fileNameField.addClass(Styles.font)
-                        scheduleFilePath = """..\..\..\src\main\resources\Spring 2019 Validation Report Example.xlsx"""
+                        scheduleFilePath = """"""
                     }
                 }
             }
